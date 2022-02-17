@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 
+import { WEBSITE_URL } from "@lib/config/constants";
 import { useLocale } from "@lib/hooks/useLocale";
 import { inferSSRProps } from "@lib/types/inferSSRProps";
 
@@ -47,7 +48,7 @@ export default function Logout(props: Props) {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const ssr = await ssrInit(context);
-
+  context.query.callbackUrl = `${WEBSITE_URL}${context.query.callbackUrl}` || "";
   return {
     props: {
       trpcState: ssr.dehydrate(),
