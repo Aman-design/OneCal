@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { z } from "zod";
 
+import { sendTeamInviteEmail } from "@calcom/lib/emails/email-manager";
+import { TeamInvite } from "@calcom/lib/emails/templates/team-invite-email";
 import {
   addSeat,
   removeSeat,
@@ -14,8 +16,6 @@ import {
 
 import { BASE_URL } from "@lib/config/constants";
 import { HOSTED_CAL_FEATURES } from "@lib/config/constants";
-import { sendTeamInviteEmail } from "@lib/emails/email-manager";
-import { TeamInvite } from "@lib/emails/templates/team-invite-email";
 import { getUserAvailability } from "@lib/queries/availability";
 import { getTeamWithMembers, isTeamAdmin, isTeamOwner } from "@lib/queries/teams";
 import slugify from "@lib/slugify";

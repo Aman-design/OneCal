@@ -9,14 +9,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import short from "short-uuid";
 import { v5 as uuidv5 } from "uuid";
 
-import { handlePayment } from "@ee/lib/stripe/server";
-
 import {
   sendScheduledEmails,
   sendRescheduledEmails,
   sendOrganizerRequestEmail,
   sendAttendeeRequestEmail,
-} from "@lib/emails/email-manager";
+} from "@calcom/lib/emails/email-manager";
+import { handlePayment } from "@ee/lib/stripe/server";
+
 import { ensureArray } from "@lib/ensureArray";
 import { getErrorFromUnknown } from "@lib/errors";
 import { getEventName } from "@lib/event";

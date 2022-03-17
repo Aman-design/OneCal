@@ -1,12 +1,12 @@
 import { Prisma, User, Booking, SchedulingType, BookingStatus } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { sendDeclinedEmails } from "@calcom/lib/emails/email-manager";
+import { sendScheduledEmails } from "@calcom/lib/emails/email-manager";
 import { refund } from "@ee/lib/stripe/server";
 
 import { asStringOrNull } from "@lib/asStringOrNull";
 import { getSession } from "@lib/auth";
-import { sendDeclinedEmails } from "@lib/emails/email-manager";
-import { sendScheduledEmails } from "@lib/emails/email-manager";
 import EventManager from "@lib/events/EventManager";
 import { CalendarEvent, AdditionInformation } from "@lib/integrations/calendar/interfaces/Calendar";
 import logger from "@lib/logger";

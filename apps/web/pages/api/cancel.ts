@@ -3,11 +3,11 @@ import async from "async";
 import dayjs from "dayjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
+import { sendCancelledEmails } from "@calcom/lib/emails/email-manager";
 import { refund } from "@ee/lib/stripe/server";
 
 import { asStringOrNull } from "@lib/asStringOrNull";
 import { getSession } from "@lib/auth";
-import { sendCancelledEmails } from "@lib/emails/email-manager";
 import { FAKE_DAILY_CREDENTIAL } from "@lib/integrations/Daily/DailyVideoApiAdapter";
 import { getCalendar } from "@lib/integrations/calendar/CalendarManager";
 import { CalendarEvent } from "@lib/integrations/calendar/interfaces/Calendar";
