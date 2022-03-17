@@ -1,6 +1,6 @@
 import { Logger } from "tslog";
 
-import { IS_PRODUCTION } from "@calcom/lib/constants";
+import { IS_PRODUCTION } from "@calcom/lib/config/constants";
 
 const logger = new Logger({
   dateTimePattern: "hour:minute:second.millisecond timeZoneName",
