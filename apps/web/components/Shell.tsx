@@ -17,13 +17,13 @@ import { useRouter } from "next/router";
 import React, { ReactNode, useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 
+import { NEXT_PUBLIC_BASE_URL } from "@calcom/lib/constants";
 import LicenseBanner from "@ee/components/LicenseBanner";
 import TrialBanner from "@ee/components/TrialBanner";
 import IntercomMenuItem from "@ee/lib/intercom/IntercomMenuItem";
 import ZendeskMenuItem from "@ee/lib/zendesk/ZendeskMenuItem";
 
 import classNames from "@lib/classNames";
-import { NEXT_PUBLIC_BASE_URL } from "@lib/config/constants";
 import { shouldShowOnboarding } from "@lib/getting-started";
 import { useLocale } from "@lib/hooks/useLocale";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@lib/telemetry";

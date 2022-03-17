@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 
-import { TRIAL_LIMIT_DAYS } from "@lib/config/constants";
+import { TRIAL_LIMIT_DAYS } from "@calcom/lib/constants";
+
 import { useLocale } from "@lib/hooks/useLocale";
 
 import { useMeQuery } from "@components/Shell";

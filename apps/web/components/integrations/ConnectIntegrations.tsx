@@ -2,7 +2,8 @@ import type { IntegrationOAuthCallbackState } from "pages/api/integrations/types
 import { useState } from "react";
 import { useMutation } from "react-query";
 
-import { NEXT_PUBLIC_BASE_URL } from "@lib/config/constants";
+import { NEXT_PUBLIC_BASE_URL } from "@calcom/lib/constants";
+
 import { AddAppleIntegrationModal } from "@lib/integrations/calendar/components/AddAppleIntegration";
 import { AddCalDavIntegrationModal } from "@lib/integrations/calendar/components/AddCalDavIntegration";
 

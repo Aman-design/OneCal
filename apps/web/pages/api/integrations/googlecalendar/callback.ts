@@ -1,8 +1,9 @@
 import { google } from "googleapis";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { BASE_URL } from "@calcom/lib/constants";
+
 import { getSession } from "@lib/auth";
-import { BASE_URL } from "@lib/config/constants";
 import prisma from "@lib/prisma";
 
 import { decodeOAuthState } from "../utils";

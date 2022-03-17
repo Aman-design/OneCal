@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { WEBSITE_URL } from "@calcom/lib/constants";
 import { getStripeCustomerId } from "@calcom/stripe/customer";
 
 import { getSession } from "@lib/auth";
-import { WEBSITE_URL } from "@lib/config/constants";
 import { HttpError as HttpCode } from "@lib/core/http/error";
 import prisma from "@lib/prisma";
 

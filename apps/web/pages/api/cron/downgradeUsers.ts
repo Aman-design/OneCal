@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { TRIAL_LIMIT_DAYS } from "@lib/config/constants";
+import { TRIAL_LIMIT_DAYS } from "@calcom/lib/constants";
+
 import prisma from "@lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

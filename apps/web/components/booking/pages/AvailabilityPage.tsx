@@ -16,9 +16,10 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { FormattedNumber, IntlProvider } from "react-intl";
 
+import { BASE_URL } from "@calcom/lib/constants";
+
 import { asStringOrNull } from "@lib/asStringOrNull";
 import { timeZone } from "@lib/clock";
-import { BASE_URL } from "@lib/config/constants";
 import { useLocale } from "@lib/hooks/useLocale";
 import useTheme from "@lib/hooks/useTheme";
 import { isBrandingHidden } from "@lib/isBrandingHidden";

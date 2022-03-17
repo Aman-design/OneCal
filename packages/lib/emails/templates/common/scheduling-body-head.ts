@@ -1,4 +1,4 @@
-import { IS_PRODUCTION, BASE_URL } from "@lib/config/constants";
+import { IS_PRODUCTION, BASE_URL } from "@calcom/lib/constants";
 
 export type BodyHeadType = "checkCircle" | "xCircle" | "calendarCircle";
 

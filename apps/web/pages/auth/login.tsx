@@ -7,8 +7,9 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { WEBSITE_URL } from "@calcom/lib/constants";
+
 import { ErrorCode, getSession } from "@lib/auth";
-import { WEBSITE_URL } from "@lib/config/constants";
 import { useLocale } from "@lib/hooks/useLocale";
 import { isSAMLLoginEnabled, hostedCal, samlTenantID, samlProductID } from "@lib/saml";
 import { collectPageParameters, telemetryEventTypes, useTelemetry } from "@lib/telemetry";

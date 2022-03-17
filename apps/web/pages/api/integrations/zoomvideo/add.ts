@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { stringify } from "querystring";
 
+import { BASE_URL } from "@calcom/lib/constants";
+
 import { getSession } from "@lib/auth";
-import { BASE_URL } from "@lib/config/constants";
 import prisma from "@lib/prisma";
 
 const client_id = process.env.ZOOM_CLIENT_ID;

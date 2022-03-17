@@ -1,6 +1,7 @@
 import jackson, { IAPIController, IOAuthController, JacksonOption } from "@boxyhq/saml-jackson";
 
-import { BASE_URL } from "@lib/config/constants";
+import { BASE_URL } from "@calcom/lib/constants";
+
 import { samlDatabaseUrl } from "@lib/saml";
 
 // Set the required options. Refer to https://github.com/boxyhq/jackson#configuration for the full list

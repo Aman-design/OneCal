@@ -3,8 +3,9 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 
+import { NEXT_PUBLIC_BASE_URL } from "@calcom/lib/constants";
+
 import { asStringOrNull } from "@lib/asStringOrNull";
-import { NEXT_PUBLIC_BASE_URL } from "@lib/config/constants";
 import { useLocale } from "@lib/hooks/useLocale";
 import prisma from "@lib/prisma";
 import { isSAMLLoginEnabled } from "@lib/saml";
