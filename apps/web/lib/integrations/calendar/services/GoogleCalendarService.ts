@@ -2,7 +2,8 @@ import { Credential, Prisma } from "@prisma/client";
 import { GetTokenResponse } from "google-auth-library/build/src/auth/oauth2client";
 import { Auth, calendar_v3, google } from "googleapis";
 
-import { getLocation, getRichDescription } from "@lib/CalEventParser";
+import { getLocation, getRichDescription } from "@calcom/lib/CalEventParser";
+
 import { CALENDAR_INTEGRATIONS_TYPES } from "@lib/integrations/calendar/constants/generals";
 import logger from "@lib/logger";
 import prisma from "@lib/prisma";

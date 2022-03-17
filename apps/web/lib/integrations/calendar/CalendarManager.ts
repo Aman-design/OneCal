@@ -1,7 +1,8 @@
 import { Credential, SelectedCalendar } from "@prisma/client";
 import _ from "lodash";
 
-import { getUid } from "@lib/CalEventParser";
+import { getUid } from "@calcom/lib/CalEventParser";
+
 import { getErrorFromUnknown } from "@lib/errors";
 import { EventResult } from "@lib/events/EventManager";
 import logger from "@lib/logger";

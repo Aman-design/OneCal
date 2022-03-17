@@ -1,7 +1,8 @@
 import { Calendar as OfficeCalendar } from "@microsoft/microsoft-graph-types-beta";
 import { Credential } from "@prisma/client";
 
-import { getLocation, getRichDescription } from "@lib/CalEventParser";
+import { getLocation, getRichDescription } from "@calcom/lib/CalEventParser";
+
 import { handleErrorsJson, handleErrorsRaw } from "@lib/errors";
 import { CALENDAR_INTEGRATIONS_TYPES } from "@lib/integrations/calendar/constants/generals";
 import logger from "@lib/logger";

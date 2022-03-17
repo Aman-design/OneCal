@@ -2,7 +2,8 @@ import { Credential } from "@prisma/client";
 import short from "short-uuid";
 import { v5 as uuidv5 } from "uuid";
 
-import { getUid } from "@lib/CalEventParser";
+import { getUid } from "@calcom/lib/CalEventParser";
+
 import { EventResult } from "@lib/events/EventManager";
 import { PartialReference } from "@lib/events/EventManager";
 import Huddle01VideoApiAdapter from "@lib/integrations/Huddle01/Huddle01VideoApiAdapter";

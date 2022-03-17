@@ -16,7 +16,8 @@ import {
 } from "tsdav";
 import { v4 as uuidv4 } from "uuid";
 
-import { getLocation, getRichDescription } from "@lib/CalEventParser";
+import { getLocation, getRichDescription } from "@calcom/lib/CalEventParser";
+
 import { symmetricDecrypt } from "@lib/crypto";
 import type { Event } from "@lib/events/EventManager";
 import logger from "@lib/logger";
