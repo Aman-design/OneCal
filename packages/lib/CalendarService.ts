@@ -2,6 +2,7 @@
 import { Credential, Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
+import toArray from "dayjs/plugin/toArray";
 import utc from "dayjs/plugin/utc";
 import ICAL from "ical.js";
 import { Attendee, createEvent, DateArray, DurationObject, Person } from "ics";
@@ -36,21 +37,23 @@ const DEFAULT_CALENDAR_TYPE = "caldav";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(toArray);
 
 const CALENDSO_ENCRYPTION_KEY = process.env.CALENDSO_ENCRYPTION_KEY || "";
 
-const convertDate = (date: string): DateArray =>
+// convert date from calcom format to format needed by ics lib
+export const convertDate = (date: string): DateArray =>
   dayjs(date)
     .utc()
     .toArray()
     .slice(0, 6)
     .map((v, i) => (i === 1 ? v + 1 : v)) as DateArray;
 
-const getDuration = (start: string, end: string): DurationObject => ({
+export const getDuration = (start: string, end: string): DurationObject => ({
   minutes: dayjs(end).diff(dayjs(start), "minute"),
 });
 
-const getAttendees = (attendees: Person[]): Attendee[] =>
+export const getAttendees = (attendees: Person[]): Attendee[] =>
   attendees.map(({ email, name }) => ({ name, email, partstat: "NEEDS-ACTION" }));
 
 export default abstract class BaseCalendarService implements Calendar {
