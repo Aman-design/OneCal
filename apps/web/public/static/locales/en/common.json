@@ -736,5 +736,9 @@
   "send_reschedule_request": "Send reschedule request",
   "edit_booking": "Edit booking",
   "reschedule_booking": "Reschedule booking",
-  "former_time": "Former time"
+  "former_time": "Former time",
+  "wipe_my_calendar": "Wipe My Calendar",
+  "wipe_my_cal_dialog_will_subtitle": "This will cancel all upcoming meetings from",
+  "wipe_my_cal_dialog_confirmation_text": "Are you sure? This can't be undone",
+  "wipe_my_cal_text_button": "Wipe Today"
 }

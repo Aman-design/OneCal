@@ -16,7 +16,11 @@ import { deleteMeeting } from "./videoClient";
 
 type PersonAttendeeCommonFields = Pick<User, "id" | "email" | "name" | "locale" | "timeZone" | "username">;
 
-const Reschedule = async (bookingUid: string, cancellationReason: string) => {
+const Reschedule = async (
+  bookingUid: string,
+  userId: number | null | undefined,
+  cancellationReason: string
+) => {
   const bookingToReschedule = await prisma.booking.findFirst({
     select: {
       id: true,
@@ -44,6 +48,7 @@ const Reschedule = async (bookingUid: string, cancellationReason: string) => {
     },
     rejectOnNotFound: true,
     where: {
+      userId: userId,
       uid: bookingUid,
       NOT: {
         status: {

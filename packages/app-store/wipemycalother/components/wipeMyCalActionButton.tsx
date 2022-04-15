@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useLocale } from "@calcom/lib/hooks/useLocale";
 import Button from "@calcom/ui/Button";
 
 import { ConfirmDialog } from "./confirmDialog";
@@ -10,7 +11,7 @@ interface IWipeMyCalActionButtonProps {
 
 const WipeMyCalActionButton = (props: IWipeMyCalActionButtonProps) => {
   const { trpc } = props;
-
+  const { t } = useLocale();
   const [openDialog, setOpenDialog] = useState(false);
   const { isSuccess, isLoading, data } = trpc.useQuery(["viewer.integrations"]);
 
@@ -22,7 +23,7 @@ const WipeMyCalActionButton = (props: IWipeMyCalActionButtonProps) => {
         data?.other?.items.find((item: { type: string }) => item.type === "wipemycal_other") && (
           <>
             <ConfirmDialog trpc={trpc} isOpenDialog={openDialog} setIsOpenDialog={setOpenDialog} />
-            <Button onClick={() => setOpenDialog(true)}>Wipe Today</Button>
+            <Button onClick={() => setOpenDialog(true)}>{t("wipe_my_cal_text_button")}</Button>
           </>
         )}
     </div>

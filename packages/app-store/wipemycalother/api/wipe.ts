@@ -36,6 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         status: {
           in: [BookingStatus.ACCEPTED, BookingStatus.PENDING],
         },
+        // @NOTE: important param do not remove
         userId: req.session.user.id,
       },
       select: {
@@ -46,12 +47,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     const q = queue({ results: [] });
-    if (todayBookings.length > 0) {
-      todayBookings.forEach((booking) =>
-        q.push(() => {
-          return Reschedule(booking.uid, "");
-        })
-      );
+    const userId = req?.session?.user?.id;
+    if (userId && typeof userId === "number") {
+      if (todayBookings.length > 0) {
+        todayBookings.forEach((booking) =>
+          q.push(() => {
+            return Reschedule(booking.uid, userId, "");
+          })
+        );
+      }
     }
     await q.start();
   } catch (error: unknown) {
