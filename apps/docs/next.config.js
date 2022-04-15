@@ -6,6 +6,6 @@ const withNextra = require("nextra")({
 
 module.exports = withNextra({
   async rewrites() {
-    return [{ basePath: false, source: "/api", destination: "https://swagger-beta.vercel.app" }];
+    return [{ basePath: false, source: "/api", destination: "https://developer.cal.com" }];
   },
 });
