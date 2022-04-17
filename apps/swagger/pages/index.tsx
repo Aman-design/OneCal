@@ -22,7 +22,7 @@ const requestSnippets = {
   },
   defaultExpanded: true,
   languages: ["curl_bash", "curl_powershell", "curl_cmd", "node"],
-  // e.g. only shxwow curl bash = ["curl_bash"]
+  // e.g. only ow curl bash = ["curl_bash"]
 };
 export default function APIDocs() {
   return (
