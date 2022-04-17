@@ -175,11 +175,12 @@
 .swagger-ui .opblock .opblock-summary-method {
   font-size: 20px;
   font-weight: 700;
-  min-width: 80px;
-  padding: 3px 12px;
-  text-align: center;
+  min-width: 90px;
+  height: 100%;
   margin-left: -5px;
-  display: table;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 0px;
   background: #000;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
@@ -252,8 +253,8 @@
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
-  padding: 15px;
+  flex-direction: row;
+  /* padding: 15px; */
   cursor: pointer;
   -webkit-box-align: left;
   -ms-flex-align: left;
@@ -726,8 +727,9 @@
 }
 
 .swagger-ui .authorization__btn {
-  padding: 0 10px;
+  padding: 5px;
   border: none;
+  width: 30px;
   background: none;
 }
 
@@ -771,6 +773,7 @@
   display: flex;
   background: black;
   color: white;
+  width: inherit;
   border: none;
 }
 @media only screen and (max-width: 600px) {
