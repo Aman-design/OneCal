@@ -76,6 +76,7 @@ export default class GoogleCalendarService implements Calendar {
     return new Promise((resolve, reject) =>
       this.auth.getToken().then((myGoogleAuth) => {
         const payload: calendar_v3.Schema$Event = {
+          id: event.uid!.toLowerCase().replace(/[wxyz]/g, ""),
           summary: event.title,
           description: getRichDescription(event),
           start: {
@@ -117,6 +118,10 @@ export default class GoogleCalendarService implements Calendar {
             conferenceDataVersion: 1,
           },
           function (err, event) {
+            console.log(
+              "🚀 ~ file: CalendarService.ts ~ line 120 ~ GoogleCalendarService ~ this.auth.getToken ~ event",
+              event
+            );
             if (err || !event?.data) {
               console.error("There was an error contacting google calendar service: ", err);
               return reject(err);
@@ -172,7 +177,7 @@ export default class GoogleCalendarService implements Calendar {
             calendarId: event.destinationCalendar?.externalId
               ? event.destinationCalendar.externalId
               : "primary",
-            eventId: uid,
+            eventId: uid.toLowerCase().replace(/[wxyz]/g, ""),
             sendNotifications: true,
             sendUpdates: "all",
             requestBody: payload,
@@ -203,7 +208,7 @@ export default class GoogleCalendarService implements Calendar {
             calendarId: event.destinationCalendar?.externalId
               ? event.destinationCalendar.externalId
               : "primary",
-            eventId: uid,
+            eventId: uid.toLowerCase().replace(/[wxyz]/g, ""),
             sendNotifications: true,
             sendUpdates: "all",
           },
