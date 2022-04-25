@@ -10,7 +10,7 @@ export type BookingCreateBody = {
   end: string;
   web3Details?: {
     userWallet: string;
-    userSignature: unknown;
+    userSignature: string;
   };
   eventTypeId: number;
   eventTypeSlug: string;
