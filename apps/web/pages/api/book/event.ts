@@ -378,6 +378,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const rescheduleUid = reqBody.rescheduleUid;
   let evt: CalendarEvent;
+  let user: User | null = null;
+
+  type Booking = Prisma.PromiseReturnType<typeof createBooking>;
+  let booking: Booking | null = null;
+  let referencesToCreate: PartialReference[] = [];
 
   const isTimeInPast = (time: string): boolean => {
     return dayjs(time).isBefore(new Date(), "day");
@@ -481,38 +486,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!eventType.seatsPerTimeSlot)
       return res.status(404).json({ message: "Event type does not have seats" });
 
-    const booking = await prisma.booking.findUnique({
+    const bookingQuery = await prisma.booking.findUnique({
       where: {
         uid: reqBody.bookingUid,
       },
       include: {
         attendees: true,
+        payment: true,
+        user: true,
       },
     });
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    if (!bookingQuery) return res.status(404).json({ message: "Booking not found" });
 
-    if (eventType.seatsPerTimeSlot <= booking.attendees.length)
+    if (eventType.seatsPerTimeSlot <= bookingQuery.attendees.length)
       return res.status(409).json({ message: "Booking seats are full" });
 
-    if (booking.attendees.some((attendee) => attendee.email === invitee[0].email))
+    if (bookingQuery.attendees.some((attendee) => attendee.email === invitee[0].email))
       return res.status(409).json({ message: "Already signed up for time slot" });
 
-    await prisma.booking.update({
-      where: {
-        uid: reqBody.bookingUid,
-      },
-      data: {
-        attendees: {
-          create: {
-            email: invitee[0].email,
-            name: invitee[0].name,
-            timeZone: invitee[0].timeZone,
-            locale: invitee[0].language.locale,
+    if (eventType.requiresConfirmation || eventType.price) {
+      booking = bookingQuery;
+    } else {
+      await prisma.booking.update({
+        where: {
+          uid: reqBody.bookingUid,
+        },
+        data: {
+          attendees: {
+            create: {
+              email: invitee[0].email,
+              name: invitee[0].name,
+              timeZone: invitee[0].timeZone,
+              locale: invitee[0].language.locale,
+            },
           },
         },
-      },
-    });
-    return res.status(201).json(booking);
+      });
+      return res.status(201).json(booking);
+    }
   } else {
     const seed = `${users[0].username}:${dayjs(req.body.start).utc().format()}:${new Date().getTime()}`;
 
@@ -566,8 +577,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     let results: EventResult[] = [];
-    let referencesToCreate: PartialReference[] = [];
-    let user: User | null = null;
 
     /** Let's start checking for availability */
     for (const currentUser of users) {
@@ -673,8 +682,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    type Booking = Prisma.PromiseReturnType<typeof createBooking>;
-    let booking: Booking | null = null;
     try {
       booking = await createBooking(reqBody, originalRescheduledBooking, evt, eventType, seed, users);
       evt.uid = booking.uid;
