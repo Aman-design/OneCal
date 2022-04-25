@@ -377,7 +377,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   log.debug(`Booking eventType ${eventTypeId} started`);
 
   const rescheduleUid = reqBody.rescheduleUid;
-  let evt: CalendarEvent;
   let user: User | null = null;
 
   type Booking = Prisma.PromiseReturnType<typeof createBooking>;
@@ -400,6 +399,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const eventType = !eventTypeId ? getDefaultEvent(eventTypeSlug) : await getEventTypesFromDB(eventTypeId);
   if (!eventType) return res.status(404).json({ message: "eventType.notFound" });
+
+  const additionalNotes =
+    reqBody.notes +
+    reqBody.customInputs.reduce(
+      (str, input) => str + "<br /><br />" + input.label + ":<br />" + input.value,
+      ""
+    );
 
   let users = !eventTypeId
     ? await prisma.user.findMany({
@@ -481,6 +487,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const attendeesList = [...invitee, ...guests, ...teamMembers];
 
+  const eventNameObject = {
+    attendeeName: reqBody.name || "Nameless",
+    eventType: eventType.title,
+    eventName: eventType.eventName,
+    host: users[0].name || "Nameless",
+    t: tOrganizer,
+  };
+
+  const evt: CalendarEvent = {
+    type: eventType.title,
+    title: getEventName(eventNameObject), //this needs to be either forced in english, or fetched for each attendee and organizer separately
+    description: eventType.description,
+    additionalNotes,
+    startTime: reqBody.start,
+    endTime: reqBody.end,
+    organizer: {
+      name: users[0].name || "Nameless",
+      email: users[0].email || "Email-less",
+      timeZone: users[0].timeZone,
+      language: { translate: tOrganizer, locale: organizer?.locale ?? "en" },
+    },
+    attendees: attendeesList,
+    location: reqBody.location, // Will be processed by the EventManager later.
+    /** For team events & dynamic collective events, we will need to handle each member destinationCalendar eventually */
+    destinationCalendar: eventType.destinationCalendar || users[0].destinationCalendar,
+    hideCalendarNotes: eventType.hideCalendarNotes,
+  };
+
   // For seats, if the booking already exists then we want to add the new attendee to the existing booking
   if (reqBody.bookingUid) {
     if (!eventType.seatsPerTimeSlot)
@@ -526,41 +560,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else {
     const seed = `${users[0].username}:${dayjs(req.body.start).utc().format()}:${new Date().getTime()}`;
-
-    const eventNameObject = {
-      attendeeName: reqBody.name || "Nameless",
-      eventType: eventType.title,
-      eventName: eventType.eventName,
-      host: users[0].name || "Nameless",
-      t: tOrganizer,
-    };
-
-    const additionalNotes =
-      reqBody.notes +
-      reqBody.customInputs.reduce(
-        (str, input) => str + "<br /><br />" + input.label + ":<br />" + input.value,
-        ""
-      );
-
-    evt = {
-      type: eventType.title,
-      title: getEventName(eventNameObject), //this needs to be either forced in english, or fetched for each attendee and organizer separately
-      description: eventType.description,
-      additionalNotes,
-      startTime: reqBody.start,
-      endTime: reqBody.end,
-      organizer: {
-        name: users[0].name || "Nameless",
-        email: users[0].email || "Email-less",
-        timeZone: users[0].timeZone,
-        language: { translate: tOrganizer, locale: organizer?.locale ?? "en" },
-      },
-      attendees: attendeesList,
-      location: reqBody.location, // Will be processed by the EventManager later.
-      /** For team events & dynamic collective events, we will need to handle each member destinationCalendar eventually */
-      destinationCalendar: eventType.destinationCalendar || users[0].destinationCalendar,
-      hideCalendarNotes: eventType.hideCalendarNotes,
-    };
 
     if (eventType.schedulingType === SchedulingType.COLLECTIVE) {
       evt.team = {
