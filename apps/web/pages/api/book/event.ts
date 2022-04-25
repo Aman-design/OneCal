@@ -681,6 +681,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+    if (!user) return res.status(404).json({ message: "Error parsing user" });
+
     try {
       booking = await createBooking(reqBody, originalRescheduledBooking, evt, eventType, seed, users);
       evt.uid = booking.uid;
@@ -694,8 +696,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       res.status(500).end();
       return;
     }
-
-    if (!user) throw Error("Can't continue, user not found.");
 
     // After polling videoBusyTimes, credentials might have been changed due to refreshment, so query them again.
     const credentials = await refreshCredentials(user.credentials);
@@ -772,6 +772,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await sendOrganizerRequestEmail(evt);
     await sendAttendeeRequestEmail(evt, attendeesList[0]);
   }
+
+  if (!user) throw Error("Can't continue, user not found.");
 
   if (typeof eventType.price === "number" && eventType.price > 0 && !originalRescheduledBooking?.paid) {
     try {
