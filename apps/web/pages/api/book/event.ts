@@ -733,7 +733,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
         }
 
-        await sendRescheduledEmails({ ...evt, additionInformation: metadata });
+        await sendRescheduledEmails({
+          ...evt,
+          additionInformation: metadata,
+          additionalNotes, // Resets back to the addtionalNote input and not the overriden value
+        });
       }
       // If it's not a reschedule, doesn't require confirmation and there's no price,
       // Create a booking
@@ -763,81 +767,86 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           metadata.conferenceData = results[0].createdEvent?.conferenceData;
           metadata.entryPoints = results[0].createdEvent?.entryPoints;
         }
-        await sendScheduledEmails({ ...evt, additionInformation: metadata });
+
+        await sendScheduledEmails({
+          ...evt,
+          additionInformation: metadata,
+          additionalNotes,
+        });
       }
     }
-  }
 
-  if (eventType.requiresConfirmation && !rescheduleUid) {
-    await sendOrganizerRequestEmail(evt);
-    await sendAttendeeRequestEmail(evt, attendeesList[0]);
-  }
-
-  if (!user) throw Error("Can't continue, user not found.");
-
-  if (typeof eventType.price === "number" && eventType.price > 0 && !originalRescheduledBooking?.paid) {
-    try {
-      const [firstStripeCredential] = user.credentials.filter((cred) => cred.type == "stripe_payment");
-
-      if (!booking.user) booking.user = user;
-      const payment = await handlePayment(evt, eventType, firstStripeCredential, booking);
-
-      res.status(201).json({ ...booking, message: "Payment required", paymentUid: payment.uid });
-      return;
-    } catch (e) {
-      log.error(`Creating payment failed`, e);
-      res.status(500).json({ message: "Payment Failed" });
-      return;
+    if (eventType.requiresConfirmation && !rescheduleUid) {
+      await sendOrganizerRequestEmail({ ...evt, additionalNotes });
+      await sendAttendeeRequestEmail({ ...evt, additionalNotes }, attendeesList[0]);
     }
-  }
 
-  log.debug(`Booking ${user.username} completed`);
+    if (!user) throw Error("Can't continue, user not found.");
 
-  const eventTrigger: WebhookTriggerEvents = rescheduleUid ? "BOOKING_RESCHEDULED" : "BOOKING_CREATED";
-  const subscriberOptions = {
-    userId: user.id,
-    eventTypeId,
-    triggerEvent: eventTrigger,
-  };
+    if (typeof eventType.price === "number" && eventType.price > 0 && !originalRescheduledBooking?.paid) {
+      try {
+        const [firstStripeCredential] = user.credentials.filter((cred) => cred.type == "stripe_payment");
 
-  // Send Webhook call if hooked to BOOKING_CREATED & BOOKING_RESCHEDULED
-  const subscribers = await getSubscribers(subscriberOptions);
-  console.log("evt:", {
-    ...evt,
-    metadata: reqBody.metadata,
-  });
-  const promises = subscribers.map((sub) =>
-    sendPayload(
-      eventTrigger,
-      new Date().toISOString(),
-      sub.subscriberUrl,
-      {
-        ...evt,
-        rescheduleUid,
-        metadata: reqBody.metadata,
+        if (!booking.user) booking.user = user;
+        const payment = await handlePayment(evt, eventType, firstStripeCredential, booking);
+
+        res.status(201).json({ ...booking, message: "Payment required", paymentUid: payment.uid });
+        return;
+      } catch (e) {
+        log.error(`Creating payment failed`, e);
+        res.status(500).json({ message: "Payment Failed" });
+        return;
+      }
+    }
+
+    log.debug(`Booking ${user.username} completed`);
+
+    const eventTrigger: WebhookTriggerEvents = rescheduleUid ? "BOOKING_RESCHEDULED" : "BOOKING_CREATED";
+    const subscriberOptions = {
+      userId: user.id,
+      eventTypeId,
+      triggerEvent: eventTrigger,
+    };
+
+    // Send Webhook call if hooked to BOOKING_CREATED & BOOKING_RESCHEDULED
+    const subscribers = await getSubscribers(subscriberOptions);
+    console.log("evt:", {
+      ...evt,
+      metadata: reqBody.metadata,
+    });
+    const promises = subscribers.map((sub) =>
+      sendPayload(
+        eventTrigger,
+        new Date().toISOString(),
+        sub.subscriberUrl,
+        {
+          ...evt,
+          rescheduleUid,
+          metadata: reqBody.metadata,
+        },
+        sub.payloadTemplate
+      ).catch((e) => {
+        console.error(`Error executing webhook for event: ${eventTrigger}, URL: ${sub.subscriberUrl}`, e);
+      })
+    );
+    await Promise.all(promises);
+    // Avoid passing referencesToCreate with id unique constrain values
+    await prisma.booking.update({
+      where: {
+        uid: booking.uid,
       },
-      sub.payloadTemplate
-    ).catch((e) => {
-      console.error(`Error executing webhook for event: ${eventTrigger}, URL: ${sub.subscriberUrl}`, e);
-    })
-  );
-  await Promise.all(promises);
-  // Avoid passing referencesToCreate with id unique constrain values
-  await prisma.booking.update({
-    where: {
-      uid: booking.uid,
-    },
-    data: {
-      references: {
-        createMany: {
-          data: referencesToCreate,
+      data: {
+        references: {
+          createMany: {
+            data: referencesToCreate,
+          },
         },
       },
-    },
-  });
+    });
 
-  // booking successful
-  return res.status(201).json(booking);
+    // booking successful
+    return res.status(201).json(booking);
+  }
 }
 
 export function getLuckyUsers(
