@@ -234,6 +234,13 @@ model Attendee {
   locale    String?  @default("en")
   booking   Booking? @relation(fields: [bookingId], references: [id])
   bookingId Int?
+  status    String   @default("accepted")
+}
+
+enum AttendeeStatus {
+  ACCEPTED  @map("accepted")
+  REJECTED  @map("rejected")
+  PENDING   @map("pending")
 }
 
 enum BookingStatus {
