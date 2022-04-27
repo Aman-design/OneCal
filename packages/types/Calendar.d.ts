@@ -11,7 +11,8 @@ export type Person = {
   name: string;
   email: string;
   timeZone: string;
-  language: { translate: TFunction; locale: string };
+  language?: { translate: TFunction; locale: string };
+  locale?: string;
   username?: string;
   id?: string;
 };
@@ -79,7 +80,7 @@ export interface CalendarEvent {
   startTime: string;
   endTime: string;
   organizer: Person;
-  attendees: Person[];
+  attendees: RequiresAtleastOne<Person, "language" | "locale">[];
   additionalNotes?: string | null;
   description?: string | null;
   team?: {

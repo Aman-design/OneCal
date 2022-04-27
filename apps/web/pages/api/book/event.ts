@@ -379,8 +379,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const rescheduleUid = reqBody.rescheduleUid;
   let user: User | null = null;
 
-  type Booking = Prisma.PromiseReturnType<typeof createBooking>;
-  let booking: Booking | null = null;
   let referencesToCreate: PartialReference[] = [];
 
   const isTimeInPast = (time: string): boolean => {
@@ -395,6 +393,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     log.error(`Booking ${eventTypeId} failed`, error);
     return res.status(400).json(error);
+  }
+
+  type Booking = Prisma.PromiseReturnType<typeof createBooking>;
+  let booking: Booking | null = null;
+
+  if (reqBody.bookingUid) {
+    booking = await prisma.booking.findUnique({
+      where: {
+        uid: reqBody.bookingUid,
+      },
+      include: {
+        attendees: true,
+        payment: true,
+        user: true,
+      },
+    });
   }
 
   const eventType = !eventTypeId ? getDefaultEvent(eventTypeSlug) : await getEventTypesFromDB(eventTypeId);
@@ -495,7 +509,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     t: tOrganizer,
   };
 
-  const evt: CalendarEvent = {
+  let evt: CalendarEvent = {
     type: eventType.title,
     title: getEventName(eventNameObject), //this needs to be either forced in english, or fetched for each attendee and organizer separately
     description: eventType.description,
@@ -508,7 +522,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       timeZone: users[0].timeZone,
       language: { translate: tOrganizer, locale: organizer?.locale ?? "en" },
     },
-    attendees: attendeesList,
+    attendees: booking ? booking.attendees : attendeesList,
     location: reqBody.location, // Will be processed by the EventManager later.
     /** For team events & dynamic collective events, we will need to handle each member destinationCalendar eventually */
     destinationCalendar: eventType.destinationCalendar || users[0].destinationCalendar,
@@ -520,16 +534,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!eventType.seatsPerTimeSlot)
       return res.status(404).json({ message: "Event type does not have seats" });
 
-    booking = await prisma.booking.findUnique({
-      where: {
-        uid: reqBody.bookingUid,
-      },
-      include: {
-        attendees: true,
-        payment: true,
-        user: true,
-      },
-    });
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     if (eventType.seatsPerTimeSlot <= booking.attendees.length)
