@@ -520,7 +520,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!eventType.seatsPerTimeSlot)
       return res.status(404).json({ message: "Event type does not have seats" });
 
-    const bookingQuery = await prisma.booking.findUnique({
+    booking = await prisma.booking.findUnique({
       where: {
         uid: reqBody.bookingUid,
       },
@@ -530,32 +530,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         user: true,
       },
     });
-    if (!bookingQuery) return res.status(404).json({ message: "Booking not found" });
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    if (eventType.seatsPerTimeSlot <= bookingQuery.attendees.length)
+    if (eventType.seatsPerTimeSlot <= booking.attendees.length)
       return res.status(409).json({ message: "Booking seats are full" });
 
-    if (bookingQuery.attendees.some((attendee) => attendee.email === invitee[0].email))
+    if (booking.attendees.some((attendee) => attendee.email === invitee[0].email))
       return res.status(409).json({ message: "Already signed up for time slot" });
 
-    if (eventType.requiresConfirmation || eventType.price) {
-      booking = bookingQuery;
-    } else {
-      await prisma.booking.update({
-        where: {
-          uid: reqBody.bookingUid,
-        },
-        data: {
-          attendees: {
-            create: {
-              email: invitee[0].email,
-              name: invitee[0].name,
-              timeZone: invitee[0].timeZone,
-              locale: invitee[0].language.locale,
-            },
+    await prisma.booking.update({
+      where: {
+        uid: reqBody.bookingUid,
+      },
+      data: {
+        attendees: {
+          create: {
+            email: invitee[0].email,
+            name: invitee[0].name,
+            timeZone: invitee[0].timeZone,
+            locale: invitee[0].language.locale,
+            status: eventType.requiresConfirmation && eventType.price ? "pending" : "accepted",
           },
         },
-      });
+      },
+    });
+
+    if (!eventType.requiresConfirmation && !eventType.price) {
       return res.status(201).json(booking);
     }
   } else {
