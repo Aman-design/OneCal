@@ -271,7 +271,7 @@ const BookingPage = ({
       timeZone: timeZone(),
       language: i18n.language,
       rescheduleUid,
-      bookingUid: parseInt(router.query.bookingUid),
+      bookingUid: router.query.bookingUid as string,
       user: router.query.user,
       location: getLocationValue(
         booking.locationType ? booking : { ...booking, locationType: selectedLocation }
