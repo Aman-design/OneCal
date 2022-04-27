@@ -377,6 +377,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   log.debug(`Booking eventType ${eventTypeId} started`);
 
   const rescheduleUid = reqBody.rescheduleUid;
+  let originalRescheduledBooking: BookingType = null;
+
   let user: User | null = null;
 
   let metadata: AdditionInformation = {};
@@ -576,7 +578,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Initialize EventManager with credentials
 
-    let originalRescheduledBooking: BookingType = null;
     if (rescheduleUid) {
       originalRescheduledBooking = await getOriginalRescheduledBooking(rescheduleUid);
     }
