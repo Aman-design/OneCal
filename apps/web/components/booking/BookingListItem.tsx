@@ -1,6 +1,6 @@
 import { BanIcon, CheckIcon, ClockIcon, XIcon, PencilAltIcon } from "@heroicons/react/outline";
 import { PaperAirplaneIcon } from "@heroicons/react/outline";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, Attendee } from "@prisma/client";
 import dayjs from "dayjs";
 import { useState } from "react";
 import { useMutation } from "react-query";
@@ -20,7 +20,12 @@ import TableActions, { ActionType } from "@components/ui/TableActions";
 
 type BookingItem = inferQueryOutput<"viewer.bookings">["bookings"][number];
 
-function BookingListItem(booking: BookingItem) {
+type BookingListItemProps = {
+  booking: BookingItem;
+  attendee?: Attendee;
+};
+
+function BookingListItem<BookingListItemProps>(booking: BookingItem, attendee: Attendee) {
   // Get user so we can determine 12/24 hour format preferences
   const query = useMeQuery();
   const user = query.data;

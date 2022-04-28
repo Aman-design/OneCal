@@ -65,9 +65,17 @@ export default function Bookings() {
                       <tbody className="divide-y divide-gray-200 bg-white" data-testid="bookings">
                         {query.data.pages.map((page, index) => (
                           <Fragment key={index}>
-                            {page.bookings.map((booking) => (
-                              <BookingListItem key={booking.id} {...booking} />
-                            ))}
+                            {page.bookings.map((booking) => {
+                              if (booking.attendees.some((attendee) => attendee.status === "PENDING")) {
+                                booking.attendees.map((attendee) => {
+                                  return (
+                                    <BookingListItem key={booking.id} {...booking} attendee={attendee} />
+                                  );
+                                });
+                              } else {
+                                return <BookingListItem key={booking.id} {...booking} />;
+                              }
+                            })}
                           </Fragment>
                         ))}
                       </tbody>

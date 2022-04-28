@@ -562,7 +562,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             name: invitee[0].name,
             timeZone: invitee[0].timeZone,
             locale: invitee[0].language.locale,
-            status: eventType.requiresConfirmation && eventType.price ? "pending" : "accepted",
+            status: eventType.requiresConfirmation && eventType.price ? "PENDING" : "ACCEPTED",
           },
         },
       },
