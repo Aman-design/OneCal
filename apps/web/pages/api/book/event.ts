@@ -306,7 +306,7 @@ async function createBooking(
     eventType: eventTypeRel,
     attendees: {
       createMany: {
-        data: evt.attendees.map((attendee) => {
+        data: evt.attendees.map((attendee, index) => {
           //if attendee is team member, it should fetch their locale not booker's locale
           //perhaps make email fetch request to see if his locale is stored, else
           const retObj = {
@@ -314,6 +314,11 @@ async function createBooking(
             email: attendee.email,
             timeZone: attendee.timeZone,
             locale: attendee.language.locale,
+            // The first entry in the attendees array for new bookings will always be invitee
+            status:
+              index === 0 && eventType.seatsPerTimeSlot && (eventType.requiresConfirmation || eventType.price)
+                ? "pending"
+                : "accepted",
           };
           return retObj;
         }),
@@ -515,7 +520,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   let evt: CalendarEvent = {
     type: eventType.title,
-    title: getEventName(eventNameObject), //this needs to be either forced in english, or fetched for each attendee and organizer separately
+    title: eventType.seatsPerTimeSlot ? eventType.title : getEventName(eventNameObject), //this needs to be either forced in english, or fetched for each attendee and organizer separately
     description: eventType.description,
     additionalNotes,
     startTime: reqBody.start,
