@@ -21,7 +21,7 @@ import Select from "@components/ui/form/Select";
 
 type EmbedType = "inline" | "floating-popup" | "element-click";
 const queryParamsForDialog = ["embedType", "tabName", "eventTypeId"];
-
+console.log("TESTING");
 const embeds: {
   illustration: React.ReactElement;
   title: string;
