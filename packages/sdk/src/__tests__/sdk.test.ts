@@ -259,6 +259,7 @@ describe("Cal.com SDK", () => {
           id: 1
         })
         .then((data: any) => {
+          // console.log(data);
           expect(data.booking).toBeTruthy();
           // console.log(data.booking);
           expect(data.booking.uid).toBe("b0100b35-e0d9-415e-95e6-eaa3de41a963");
@@ -268,30 +269,30 @@ describe("Cal.com SDK", () => {
       await cal
         .editBookingById(
           {
-            uid: "12345"
-
-            // type: "new-type",
-            // meetingId: "another-meeting"
+            uid: "b0100b35-e0d9-415e-95e6-eaa3de41a963",
+            title: "45min"
+            // startTime: new Date("2022-05-05T18:37:29.408Z"),
+            // endTime: new Date("2022-05-05T19:07:29.425Z")
           },
           {
             id: 1
           }
         )
         .then((data: any) => {
+          console.log(data.booking);
           expect(data.booking).toBeTruthy();
-          expect(data.booking.uid).toBe("12345");
-          // expect(data.booking.meetingId).toBe("another-meeting");
+          expect(data.booking.uid).toBe("b0100b35-e0d9-415e-95e6-eaa3de41a963");
+          expect(data.booking.title).toBe("45min");
         });
     });
     let newBooking: any;
     it("should create a new booking", async () => {
       await cal
         .addBooking({
-          uid: "12345"
-          // type: "type",
-          // meetingId: "ameeting",
-          // deleted: false,
-          // bookingId: 1
+          uid: "b0100b35-e0d9-415e-95e6-eaa3de41a963s",
+          title: "45min",
+          startTime: new Date("2022-05-05T18:37:29.408Z"),
+          endTime: new Date("2022-05-05T19:07:29.425Z")
         })
         .then((data: any) => {
           newBooking = data.booking;
