@@ -15,9 +15,10 @@ describe("Cal.com SDK", () => {
       });
     });
     it(`cal.delete('/users/1') should fail to remove a user that is not owner of apiKey`, async () => {
-      await cal.delete("/users/1").then((data: any) => {
-        expect(data.status).toBe(401);
-        expect(data.statusText).toBe("Unathorized");
+      await cal.delete("/users/1").catch((error) => {
+        expect(error).toBeTruthy();
+        expect(error.status).toBe(401);
+        expect(error.statusText).toBe("Unauthorized");
       });
     });
     // With Operation IDs
@@ -51,15 +52,17 @@ describe("Cal.com SDK", () => {
           expect(data.user.timeZone).toBe("Europe/Madrid");
         });
     });
-    // it('cal.removeUserById() should remove an user', async () => {
-    //   await cal
-    //     .removeUserById({
-    //       id: 4,
-    //     })
-    //     .then((data: any) => {
-    //       expect(data.message).toBeTruthy();
-    //     });
-    // });
+    it("cal.removeUserById() should remove an user", async () => {
+      await cal
+        .removeUserById({
+          id: 1
+        })
+        .catch((error) => {
+          expect(error).toBeTruthy();
+          expect(error.status).toBe(401);
+          expect(error.statusText).toBe("Unauthorized");
+        });
+    });
   });
 
   // Attendees
@@ -257,7 +260,7 @@ describe("Cal.com SDK", () => {
         })
         .then((data: any) => {
           expect(data.booking).toBeTruthy();
-          console.log(data.booking);
+          // console.log(data.booking);
           expect(data.booking.uid).toBe("b0100b35-e0d9-415e-95e6-eaa3de41a963");
         });
     });
