@@ -46,7 +46,8 @@ Yes, you can pass your own environment var, pointing to a valid openapi spec at 
 
 We use jest, and test all operationId's for our OpenAPI.
 `yarn test`
-
+or from the root monorepo:
+``
 ## Formatting (prettier ) and Linting (ESLint)
 
 `yarn format`

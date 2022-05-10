@@ -1,4 +1,5 @@
 import { cal } from "../index";
+import { randomUUID } from "crypto";
 
 describe("Cal.com SDK", () => {
   describe("Users", () => {
@@ -286,29 +287,97 @@ describe("Cal.com SDK", () => {
         });
     });
     let newBooking: any;
+    const uid = randomUUID();
     it("should create a new booking", async () => {
       await cal
         .addBooking({
-          uid: "b0100b35-e0d9-415e-95e6-eaa3de41a963s",
+          uid,
           title: "45min",
+          eventTypeId: 1,
           startTime: new Date("2022-05-05T18:37:29.408Z"),
           endTime: new Date("2022-05-05T19:07:29.425Z")
         })
         .then((data: any) => {
           newBooking = data.booking;
           expect(data.booking).toBeTruthy();
-          expect(data.booking.uid).toBe("12345");
+          expect(data.booking.uid).toBe(uid);
+          expect(data.booking.title).toBe("45min");
         });
     });
-    newBooking &&
-      it("should remove an booking", async () => {
-        await cal
-          .removeBookingById({
-            id: newBooking.data.id
-          })
-          .then((data: any) => {
-            expect(data.message).toBeTruthy();
-          });
+    // it("should remove an booking", async () => {
+    //   await cal
+    //     .removeBookingById({
+    //       id: 1
+    //     })
+    //     .then((data: any) => {
+    //       expect(data.message).toBeTruthy();
+    //     });
+    // });
+  });
+
+  // EventReferences
+  describe("EventReferences", () => {
+    it("should return a list of bookings", async () => {
+      await cal.listEventReferences().then((data: any) => {
+        expect(data.bookings).toBeTruthy();
       });
+    });
+    it("should return an booking by ID", async () => {
+      await cal
+        .getEventReferenceById({
+          id: 1
+        })
+        .then((data: any) => {
+          // console.log(data);
+          expect(data.booking).toBeTruthy();
+          // console.log(data.booking);
+          expect(data.booking.uid).toBe("b0100b35-e0d9-415e-95e6-eaa3de41a963");
+        });
+    });
+    it("should edit an booking", async () => {
+      await cal
+        .editEventReferenceById(
+          {
+            // uid: "b0100b35-e0d9-415e-95e6-eaa3de41a963",
+            dailyurl: "45min",
+            dailytoken: "1" // startTime: new Date("2022-05-05T18:37:29.408Z"),
+            // endTime: new Date("2022-05-05T19:07:29.425Z")
+          },
+          {
+            id: 1
+          }
+        )
+        .then((data: any) => {
+          console.log(data.booking);
+          expect(data.booking).toBeTruthy();
+          expect(data.booking.uid).toBe("b0100b35-e0d9-415e-95e6-eaa3de41a963");
+          expect(data.booking.title).toBe("45min");
+        });
+    });
+    let newEventReference: any;
+    const uid = randomUUID();
+    it("should create a new booking", async () => {
+      await cal
+        .addEventReference({
+          // uid,
+          dailyurl: "45min",
+          dailytoken: "1"
+        })
+        .then((data: any) => {
+          newEventReference = data.booking;
+          expect(data.booking).toBeTruthy();
+          expect(data.booking.uid).toBe(uid);
+          expect(data.booking.title).toBe("45min");
+        });
+    });
+    //   it("should remove an booking", async () => {
+    //     await cal
+    //       .removeEventReferenceById({
+    //         id: 1
+    //       })
+    //       .then((data: any) => {
+    //         expect(data.message).toBeTruthy();
+    //       });
+    //   });
   });
 });

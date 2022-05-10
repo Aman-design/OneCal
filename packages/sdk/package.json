@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest --config jest.config.ts",
     "build": "tsc",
-    "reset": "rm -rf node_modules && rm -rf lib && yarn install && yarn build",
+    "clean": "rm -rf node_modules && rm -rf lib && yarn install && yarn build",
     "format": "prettier --write 'src/**/*.ts'",
     "lint": "eslint --ext .js,.ts src",
     "prepare": "npm run build",
