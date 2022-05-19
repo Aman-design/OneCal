@@ -171,6 +171,7 @@ model User {
   apiKeys             ApiKey[]
   accounts            Account[]
   sessions            Session[]
+  reviews             AppReview[]
 
   @@map(name: "users")
 }
@@ -474,4 +475,13 @@ model App {
   credentials Credential[]
   Webhook     Webhook[]
   ApiKey      ApiKey[]
+}
+
+model AppReview {
+  id          Int       @id @default(autoincrement())
+  slug String @unique
+  userId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating Int
+  review String?
 }
