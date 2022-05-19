@@ -37,10 +37,11 @@ export default function AppCard(props: AppCardProps) {
           </Button>
         </div>
         <h3 className="font-medium">{props.name}</h3>
-        {/* TODO: add reviews <div className="flex text-sm text-gray-800">
+        {/* TODO: add reviews */}
+        <div className="flex text-sm text-gray-800">
           <span>{props.rating} stars</span> <StarIcon className="ml-1 mt-0.5 h-4 w-4 text-yellow-600" />
-          <span className="pl-1 text-gray-500">{props.reviews} reviews</span>
-        </div> */}
+          <span className="pl-1 text-gray-500">{props.installs} installs</span>
+        </div>
         <p className="mt-2 truncate text-sm text-gray-500">{props.description}</p>
       </a>
     </Link>
