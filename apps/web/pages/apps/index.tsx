@@ -25,15 +25,31 @@ export default function Apps({ appStore, categories }: InferGetStaticPropsType<t
 }
 
 export const getStaticProps = async () => {
-  const appStore = await getAppRegistry();
+  const appMetaData = await getAppRegistry();
 
-  const categoryQuery = await prisma.app.findMany({
+  const appsQuery = await prisma.app.findMany({
     select: {
+      slug: true,
       categories: true,
+      _count: {
+        select: {
+          credentials: true,
+        },
+      },
     },
   });
-  const categories = categoryQuery.reduce((c, app) => {
-    for (const category of app.categories) {
+  console.log("🚀 ~ file: index.tsx ~ line 40 ~ getStaticProps ~ appsQuery", appsQuery);
+
+  const appStore = appMetaData.map((app) => {
+    const installs = appsQuery.filter((query) => query.slug === app.slug);
+    console.log("🚀 ~ file: index.tsx ~ line 45 ~ appStore ~ installs", installs[0]._count.credentials);
+
+    return { ...app, installs: installs[0]._count.credentials };
+  });
+
+  const categoriesArray = appsQuery.map((app) => app.categories);
+  const categories = categoriesArray.reduce((c, app) => {
+    for (const category of app) {
       c[category] = c[category] ? c[category] + 1 : 1;
     }
     return c;

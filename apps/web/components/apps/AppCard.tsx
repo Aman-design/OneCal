@@ -11,9 +11,12 @@ interface AppCardProps {
   description: string;
   rating: number;
   reviews?: number;
+  installs?: number;
 }
 
 export default function AppCard(props: AppCardProps) {
+  console.log("🚀 ~ file: AppCard.tsx ~ line 16 ~ installs", props.installs);
+
   return (
     <Link href={"/apps/" + props.slug}>
       <a
