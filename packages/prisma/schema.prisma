@@ -483,6 +483,7 @@ model AppReview {
   slug String @unique
   userId Int
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date DateTime
   rating Int
-  review String?
+  comment String?
 }

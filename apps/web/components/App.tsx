@@ -37,6 +37,7 @@ export default function App({
   email,
   tos,
   privacy,
+  slug,
 }: {
   name: string;
   type: AppType["type"];
@@ -54,6 +55,7 @@ export default function App({
   email: string; // required
   tos?: string;
   privacy?: string;
+  slug: string;
 }) {
   const { t } = useLocale();
 
@@ -62,16 +64,26 @@ export default function App({
   const [comment, setComment] = useState("");
   const totalStars = 5;
 
-  // const onSubmitReview = async (rating: number, comment: string) => {
-  //   try {
-  //     const body = {
-  //       rating: rating,
-  //       comment: comment
-  //     }
+  const onSubmitReview = async (slug: string, rating: number, comment: string) => {
+    try {
+      const body = {
+        slug: slug,
+        rating: rating,
+        comment: comment,
+      };
 
-  //     const
-  //   }
-  // }
+      const res = await fetch("/api/app-store/reviews", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("🚀 ~ file: App.tsx ~ line 82 ~ onSubmitReview ~ res", res);
+    } catch (error) {
+      console.log("🚀 ~ file: App.tsx ~ line 82 ~ onSubmitReview ~ error", error);
+    }
+  };
 
   const priceInDollar = Intl.NumberFormat("en-US", {
     style: "currency",
@@ -283,7 +295,7 @@ export default function App({
               rows={3}
               onChange={(event) => setComment(event.target.value)}
               className="my-1 block rounded-sm border-gray-300 py-2 pb-2 shadow-sm sm:text-sm"></textarea>
-            <Button>{t("submit")}</Button>
+            <Button onClick={() => onSubmitReview(slug, rating, comment)}>{t("submit")}</Button>
           </div>
         </div>
       </Shell>

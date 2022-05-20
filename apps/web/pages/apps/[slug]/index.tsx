@@ -61,6 +61,7 @@ function SingleAppPage({ data, source }: inferSSRProps<typeof getStaticProps>) {
       docs={data.docsUrl}
       website={data.url}
       email={data.email}
+      slug={data.slug}
       //   tos="https://zoom.us/terms"
       //   privacy="https://zoom.us/privacy"
       body={<MDXRemote {...source} components={components} />}
