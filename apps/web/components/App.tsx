@@ -5,12 +5,15 @@ import {
   FlagIcon,
   MailIcon,
   ShieldCheckIcon,
+  StarIcon,
 } from "@heroicons/react/outline";
+import { StarIcon as FilledStarIcon } from "@heroicons/react/solid";
 import { ChevronLeftIcon } from "@heroicons/react/solid";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 import { InstallAppButton } from "@calcom/app-store/components";
+import classNames from "@calcom/lib/classNames";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { App as AppType } from "@calcom/types/App";
 import { Button } from "@calcom/ui";
@@ -53,6 +56,22 @@ export default function App({
   privacy?: string;
 }) {
   const { t } = useLocale();
+
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState("");
+  const totalStars = 5;
+
+  // const onSubmitReview = async (rating: number, comment: string) => {
+  //   try {
+  //     const body = {
+  //       rating: rating,
+  //       comment: comment
+  //     }
+
+  //     const
+  //   }
+  // }
 
   const priceInDollar = Intl.NumberFormat("en-US", {
     style: "currency",
@@ -236,6 +255,35 @@ export default function App({
                 <FlagIcon className="inline h-3 w-3" /> Report App
               </a>
             </div>
+          </div>
+          <div>
+            <h3>Review</h3>
+            <div className="flex">
+              {[...new Array(totalStars)].map((arr, index) => {
+                return (
+                  <button
+                    type="button"
+                    key={index}
+                    onClick={() => setRating(index)}
+                    onMouseEnter={() => setHover(index)}
+                    onMouseLeave={() => setHover(rating)}>
+                    <FilledStarIcon
+                      className={classNames(
+                        "ml-1 mt-0.5 h-4 w-4",
+                        index <= (rating || hover) ? "text-yellow-600" : "text-yellow-200"
+                      )}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+            <textarea
+              id="comment"
+              name="comment"
+              rows={3}
+              onChange={(event) => setComment(event.target.value)}
+              className="my-1 block rounded-sm border-gray-300 py-2 pb-2 shadow-sm sm:text-sm"></textarea>
+            <Button>{t("submit")}</Button>
           </div>
         </div>
       </Shell>
