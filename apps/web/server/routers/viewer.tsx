@@ -25,6 +25,7 @@ import {
 import slugify from "@lib/slugify";
 
 import { apiKeysRouter } from "@server/routers/viewer/apiKeys";
+import { appReviewsRouter } from "@server/routers/viewer/appReviews";
 import { availabilityRouter } from "@server/routers/viewer/availability";
 import { eventTypesRouter } from "@server/routers/viewer/eventTypes";
 import { TRPCError } from "@trpc/server";
@@ -928,4 +929,5 @@ export const viewerRouter = createRouter()
   .merge("availability.", availabilityRouter)
   .merge("teams.", viewerTeamsRouter)
   .merge("webhook.", webhookRouter)
-  .merge("apiKeys.", apiKeysRouter);
+  .merge("apiKeys.", apiKeysRouter)
+  .merge("appReviews.", appReviewsRouter);

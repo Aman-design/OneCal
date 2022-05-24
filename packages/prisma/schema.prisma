@@ -481,12 +481,13 @@ model App {
 }
 
 model AppReview {
-  id          Int       @id @default(autoincrement())
-  slug String @unique
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date DateTime
-  rating Int
+  id      Int      @id @default(autoincrement())
+  slug    String   @unique
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date    DateTime
+  rating  Int
+  comment String
 }
 
 model Feedback {

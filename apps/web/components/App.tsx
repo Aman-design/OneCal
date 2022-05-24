@@ -18,6 +18,8 @@ import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { App as AppType } from "@calcom/types/App";
 import { Button } from "@calcom/ui";
 
+import { trpc } from "@lib/trpc";
+
 import Shell from "@components/Shell";
 import Badge from "@components/ui/Badge";
 
@@ -64,25 +66,11 @@ export default function App({
   const [comment, setComment] = useState("");
   const totalStars = 5;
 
-  const onSubmitReview = async (slug: string, rating: number, comment: string) => {
-    try {
-      const body = {
-        slug: slug,
-        rating: rating,
-        comment: comment,
-      };
+  const postMutation = trpc.useMutation("viewer.appReviews.post");
 
-      const res = await fetch("/api/app-store/reviews", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("🚀 ~ file: App.tsx ~ line 82 ~ onSubmitReview ~ res", res);
-    } catch (error) {
-      console.log("🚀 ~ file: App.tsx ~ line 82 ~ onSubmitReview ~ error", error);
-    }
+  const onSubmitReview = async (slug: string, rating: number, comment: string) => {
+    console.log("This triggers");
+    postMutation.mutate({ slug, rating, comment });
   };
 
   const priceInDollar = Intl.NumberFormat("en-US", {
