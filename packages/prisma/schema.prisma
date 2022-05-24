@@ -66,6 +66,7 @@ model EventType {
   minimumBookingNotice    Int                    @default(120)
   beforeEventBuffer       Int                    @default(0)
   afterEventBuffer        Int                    @default(0)
+  seatsPerTimeSlot        Int?
   schedulingType          SchedulingType?
   schedule                Schedule?
   price                   Int                    @default(0)
@@ -173,6 +174,7 @@ model User {
   sessions            Session[]
   reviews             AppReview[]
 
+  Feedback Feedback[]
   @@map(name: "users")
 }
 
@@ -485,5 +487,13 @@ model AppReview {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   date DateTime
   rating Int
+}
+
+model Feedback {
+  id      Int      @id @default(autoincrement())
+  date    DateTime
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating  String
   comment String?
 }
