@@ -478,11 +478,13 @@ model App {
   credentials Credential[]
   Webhook     Webhook[]
   ApiKey      ApiKey[]
+  reviews     AppReview[]
 }
 
 model AppReview {
   id      Int      @id @default(autoincrement())
   slug    String   @unique
+  app             App                   @relation(fields: [slug], references: [slug], onDelete: Cascade)
   userId  Int
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date    DateTime
