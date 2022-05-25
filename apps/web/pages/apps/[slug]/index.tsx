@@ -84,7 +84,20 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
 
   const app = await prisma.app.findUnique({
     where: { slug: ctx.params.slug },
+    include: {
+      reviews: {
+        select: {
+          user: {
+            select: {
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+    },
   });
+  console.log("🚀 ~ file: index.tsx ~ line 100 ~ getStaticProps ~ app", app.reviews);
 
   if (!app) return { notFound: true };
 
