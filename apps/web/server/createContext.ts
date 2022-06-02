@@ -73,6 +73,8 @@ async function getUserFromSession({
       locale: true,
       timeFormat: true,
       trialEndsAt: true,
+      metadata: true,
+      allowDynamicBooking: true,
     },
   });
 

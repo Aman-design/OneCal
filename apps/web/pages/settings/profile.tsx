@@ -1,63 +1,60 @@
 import { TrashIcon } from "@heroicons/react/solid";
-import crypto from "crypto";
-import { GetServerSidePropsContext } from "next";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
-import { ComponentProps, FormEvent, RefObject, useEffect, useMemo, useRef, useState } from "react";
+import { ComponentProps, forwardRef, HTMLAttributes, useCallback, useMemo, useState } from "react";
+import { Controller, ControllerRenderProps, useForm } from "react-hook-form";
 
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import showToast from "@calcom/lib/notification";
+import { UserPlan } from "@calcom/prisma/client";
 import { Alert } from "@calcom/ui/Alert";
 import Button from "@calcom/ui/Button";
 import { Dialog, DialogTrigger } from "@calcom/ui/Dialog";
-import { TextField } from "@calcom/ui/form/fields";
+import { SelectProps } from "@calcom/ui/form/Select";
+import { Form, TextField } from "@calcom/ui/form/fields";
 
 import { withQuery } from "@lib/QueryCell";
-import { asStringOrNull, asStringOrUndefined } from "@lib/asStringOrNull";
-import { getSession } from "@lib/auth";
 import { nameOfDay } from "@lib/core/i18n/weekday";
 import { isBrandingHidden } from "@lib/isBrandingHidden";
-import prisma from "@lib/prisma";
 import { trpc } from "@lib/trpc";
-import { inferSSRProps } from "@lib/types/inferSSRProps";
 
 import ImageUploader from "@components/ImageUploader";
 import SettingsShell from "@components/SettingsShell";
 import ConfirmationDialogContent from "@components/dialog/ConfirmationDialogContent";
 import Avatar from "@components/ui/Avatar";
 import Badge from "@components/ui/Badge";
-import InfoBadge from "@components/ui/InfoBadge";
 import ColorPicker from "@components/ui/colorpicker";
+import CheckboxField from "@components/ui/form/CheckboxField";
 import Select from "@components/ui/form/Select";
-import TimezoneSelect, { ITimezone } from "@components/ui/form/TimezoneSelect";
+import TimezoneSelect from "@components/ui/form/TimezoneSelect";
 
 import { UpgradeToProDialog } from "../../components/UpgradeToProDialog";
 
-type Props = inferSSRProps<typeof getServerSideProps>;
+const CALLBACK_URL_WHEN_ACCOUNT_DELETED =
+  "/auth/logout" + (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://app.cal.com" ? "?survey=true" : "");
 
-function HideBrandingInput(props: { hideBrandingRef: RefObject<HTMLInputElement>; user: Props["user"] }) {
+const HideBrandingInput = forwardRef<
+  HTMLInputElement,
+  { user?: { plan: UserPlan; hideBranding: boolean } } & HTMLAttributes<HTMLInputElement>
+>(function HideBrandingInput({ user, ...passThroughProps }, ref) {
   const { t } = useLocale();
   const [modalOpen, setModalOpen] = useState(false);
-
   return (
     <>
       <input
+        {...passThroughProps}
+        ref={ref}
         id="hide-branding"
-        name="hide-branding"
         type="checkbox"
-        ref={props.hideBrandingRef}
-        defaultChecked={isBrandingHidden(props.user)}
+        defaultChecked={user && isBrandingHidden(user)}
         className={
           "h-4 w-4 rounded-sm border-gray-300 text-neutral-900 focus:ring-neutral-800 disabled:opacity-50"
         }
         onClick={(e) => {
-          if (!e.currentTarget.checked || props.user.plan !== "FREE") {
+          if (!e.currentTarget.checked || user?.plan !== "FREE") {
             return;
           }
-
-          // prevent checking the input
           e.preventDefault();
-
           setModalOpen(true);
         }}
       />
@@ -66,13 +63,146 @@ function HideBrandingInput(props: { hideBrandingRef: RefObject<HTMLInputElement>
       </UpgradeToProDialog>
     </>
   );
-}
+});
+
+type LocaleOption = {
+  value: string;
+  label: string;
+};
+
+type OptionType = {
+  value: unknown;
+  label?: string;
+};
+
+const I18nSelect = <IsMulti extends boolean = false>({
+  options,
+  value,
+  ...passThroughProps
+}: Omit<SelectProps<OptionType, IsMulti>, "options"> & {
+  options: OptionType[];
+}) => {
+  const { t } = useLocale();
+
+  const translate = useCallback(
+    (option: OptionType) => ({
+      value: option.value,
+      // For convenience, when a label is not given and the value is a string, the value is used as translation key.
+      label: t(option.label || (typeof option.value === "string" ? t(option.value) : "")),
+    }),
+    [t]
+  );
+
+  return (
+    <Select
+      {...passThroughProps}
+      value={options.map(translate).find((option) => option.value === value)}
+      options={options.map(translate)}
+    />
+  );
+};
+
+const THEME_OPTIONS = [{ value: "light" }, { value: "dark" }];
+const TIME_FORMAT_OPTIONS = [
+  { value: 12, label: "12_hour" },
+  { value: 24, label: "24_hour" },
+];
+
+const ThemeSelect = ({ onChange, value }: ControllerRenderProps) => {
+  const [initialValue, setInitialValue] = useState<string>();
+  const { t } = useLocale();
+  const form = useForm();
+  return (
+    <>
+      <div className="mb-2">
+        <I18nSelect
+          id="theme"
+          isDisabled={!value}
+          className="mt-1 block w-full rounded-sm shadow-sm sm:text-sm"
+          options={THEME_OPTIONS}
+          onChange={onChange}
+          value={value}
+        />
+      </div>
+      <CheckboxField
+        descriptionAsLabel
+        description={t("automatically_adjust_theme")}
+        checked={!value}
+        onChange={(e) => {
+          if (e.target.checked) {
+            setInitialValue(value);
+            form.resetField("theme");
+          } else {
+            form.setValue("theme", initialValue);
+          }
+        }}
+      />
+    </>
+  );
+};
+
+const LanguageSelect = ({
+  value = "en",
+  onChange,
+  ...props
+}: Omit<SelectProps<LocaleOption, false>, "value" | "onChange"> & {
+  value?: string;
+  onChange: (newValue?: string) => void;
+}) => {
+  const router = useRouter();
+  const localeOptions = useMemo(() => {
+    return (router.locales || []).map((locale) => ({
+      value: locale,
+      label: new Intl.DisplayNames(locale, { type: "language" }).of(locale) || "",
+    }));
+  }, [router.locales]);
+
+  const label = new Intl.DisplayNames(value, { type: "language" }).of(value);
+  if (!label) {
+    throw new Error("Unknown language");
+  }
+
+  return (
+    <Select
+      value={{
+        label,
+        value,
+      }}
+      onChange={(option) => onChange(option?.value)}
+      options={localeOptions}
+      {...props}
+    />
+  );
+};
 
 function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: string }) {
   const utils = trpc.useContext();
   const { t } = useLocale();
-  const router = useRouter();
-  const mutation = trpc.useMutation("viewer.updateProfile", {
+
+  const user = trpc.useQuery(["viewer.me"]).data;
+
+  const form = useForm({
+    defaultValues: {
+      username: user?.username || undefined,
+      name: user?.name || undefined,
+      email: user?.email,
+      avatar: user?.avatar,
+      brandColor: user?.brandColor,
+      darkBrandColor: user?.darkBrandColor,
+      allowDynamicBooking: user?.allowDynamicBooking || undefined,
+      bio: user?.bio || undefined,
+      theme: user?.theme || undefined,
+      hideBranding: user?.hideBranding,
+      timeZone: user?.timeZone,
+      timeFormat: user?.timeFormat,
+      weekStart: user?.weekStart,
+      locale: user?.locale,
+    },
+  });
+
+  const { register } = form;
+
+  const mutation = trpc.useMutation("viewer.profile.update", {
     onSuccess: async () => {
       showToast(t("your_user_profile_updated_successfully"), "success");
       setHasErrors(false); // dismiss any open errors
@@ -88,113 +218,21 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
     },
   });
 
-  const deleteAccount = async () => {
-    await fetch("/api/user/me", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).catch((e) => {
-      console.error(`Error Removing user: ${props.user.id}, email: ${props.user.email} :`, e);
-    });
-    if (process.env.NEXT_PUBLIC_WEBAPP_URL === "https://app.cal.com") {
-      signOut({ callbackUrl: "/auth/logout?survey=true" });
-    } else {
-      signOut({ callbackUrl: "/auth/logout" });
-    }
-  };
-
-  const localeOptions = useMemo(() => {
-    return (router.locales || []).map((locale) => ({
-      value: locale,
-      label: new Intl.DisplayNames(props.localeProp, { type: "language" }).of(locale) || "",
-    }));
-  }, [props.localeProp, router.locales]);
-
-  const themeOptions = [
-    { value: "light", label: t("light") },
-    { value: "dark", label: t("dark") },
-  ];
-
-  const timeFormatOptions = [
-    { value: 12, label: t("12_hour") },
-    { value: 24, label: t("24_hour") },
-  ];
-  const usernameRef = useRef<HTMLInputElement>(null!);
-  const nameRef = useRef<HTMLInputElement>(null!);
-  const emailRef = useRef<HTMLInputElement>(null!);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null!);
-  const avatarRef = useRef<HTMLInputElement>(null!);
-  const hideBrandingRef = useRef<HTMLInputElement>(null!);
-  const allowDynamicGroupBookingRef = useRef<HTMLInputElement>(null!);
-  const [selectedTheme, setSelectedTheme] = useState<typeof themeOptions[number] | undefined>();
-  const [selectedTimeFormat, setSelectedTimeFormat] = useState({
-    value: props.user.timeFormat || 12,
-    label: timeFormatOptions.find((option) => option.value === props.user.timeFormat)?.label || 12,
-  });
-  const [selectedTimeZone, setSelectedTimeZone] = useState<ITimezone>(props.user.timeZone);
-  const [selectedWeekStartDay, setSelectedWeekStartDay] = useState({
-    value: props.user.weekStart,
-    label: nameOfDay(props.localeProp, props.user.weekStart === "Sunday" ? 0 : 1),
+  const deleteAccountMutation = trpc.useMutation("viewer.profile.deleteAccount", {
+    onSuccess: () => signOut({ callbackUrl: CALLBACK_URL_WHEN_ACCOUNT_DELETED }),
+    onError: (err) => {
+      console.error(`Error Removing user: ${user?.id}, email: ${user?.email} :`, err);
+    },
   });
 
-  const [selectedLanguage, setSelectedLanguage] = useState({
-    value: props.localeProp || "",
-    label: localeOptions.find((option) => option.value === props.localeProp)?.label || "",
-  });
-  const [imageSrc, setImageSrc] = useState<string>(props.user.avatar || "");
   const [hasErrors, setHasErrors] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [brandColor, setBrandColor] = useState(props.user.brandColor);
-  const [darkBrandColor, setDarkBrandColor] = useState(props.user.darkBrandColor);
-
-  useEffect(() => {
-    if (!props.user.theme) return;
-    const userTheme = themeOptions.find((theme) => theme.value === props.user.theme);
-    if (!userTheme) return;
-    setSelectedTheme(userTheme);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  async function updateProfileHandler(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const enteredUsername = usernameRef.current.value.toLowerCase();
-    const enteredName = nameRef.current.value;
-    const enteredEmail = emailRef.current.value;
-    const enteredDescription = descriptionRef.current.value;
-    const enteredAvatar = avatarRef.current.value;
-    const enteredBrandColor = brandColor;
-    const enteredDarkBrandColor = darkBrandColor;
-    const enteredTimeZone = typeof selectedTimeZone === "string" ? selectedTimeZone : selectedTimeZone.value;
-    const enteredWeekStartDay = selectedWeekStartDay.value;
-    const enteredHideBranding = hideBrandingRef.current.checked;
-    const enteredAllowDynamicGroupBooking = allowDynamicGroupBookingRef.current.checked;
-    const enteredLanguage = selectedLanguage.value;
-    const enteredTimeFormat = selectedTimeFormat.value;
-
-    // TODO: Add validation
-
-    mutation.mutate({
-      username: enteredUsername,
-      name: enteredName,
-      email: enteredEmail,
-      bio: enteredDescription,
-      avatar: enteredAvatar,
-      timeZone: enteredTimeZone,
-      weekStart: asStringOrUndefined(enteredWeekStartDay),
-      hideBranding: enteredHideBranding,
-      allowDynamicBooking: enteredAllowDynamicGroupBooking,
-      theme: asStringOrNull(selectedTheme?.value),
-      brandColor: enteredBrandColor,
-      darkBrandColor: enteredDarkBrandColor,
-      locale: enteredLanguage,
-      timeFormat: enteredTimeFormat,
-    });
-  }
 
   return (
-    <form className="divide-y divide-gray-200 lg:col-span-9" onSubmit={updateProfileHandler}>
+    <Form
+      form={form}
+      className="divide-y divide-gray-200 lg:col-span-9"
+      handleSubmit={(values) => mutation.mutate(values)}>
       {hasErrors && <Alert severity="error" title={errorMessage} />}
       <div className="py-6 lg:pb-8">
         <div className="flex flex-col lg:flex-row">
@@ -202,14 +240,12 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
             <div className="block rtl:space-x-reverse sm:flex sm:space-x-2">
               <div className="mb-6 w-full sm:w-1/2">
                 <TextField
-                  name="username"
+                  {...register("username")}
                   addOnLeading={
                     <span className="inline-flex items-center rounded-l-sm border border-r-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
                       {process.env.NEXT_PUBLIC_WEBSITE_URL}/
                     </span>
                   }
-                  ref={usernameRef}
-                  defaultValue={props.user.username || undefined}
                 />
               </div>
               <div className="w-full sm:w-1/2">
@@ -217,15 +253,12 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                   {t("full_name")}
                 </label>
                 <input
-                  ref={nameRef}
+                  {...register("name", { required: true })}
                   type="text"
-                  name="name"
                   id="name"
                   autoComplete="given-name"
                   placeholder={t("your_name")}
-                  required
                   className="mt-1 block w-full rounded-sm border border-gray-300 px-3 py-2 shadow-sm sm:text-sm"
-                  defaultValue={props.user.name || undefined}
                 />
               </div>
             </div>
@@ -235,13 +268,11 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                   {t("email")}
                 </label>
                 <input
-                  ref={emailRef}
+                  {...register("email")}
                   type="email"
-                  name="email"
                   id="email"
                   placeholder={t("your_email")}
                   className="mt-1 block w-full rounded-sm border-gray-300 shadow-sm sm:text-sm"
-                  defaultValue={props.user.email}
                 />
                 <p className="mt-2 text-sm text-gray-500" id="email-description">
                   {t("change_email_tip")}
@@ -255,66 +286,51 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
               </label>
               <div className="mt-1">
                 <textarea
-                  ref={descriptionRef}
+                  {...register("bio")}
                   id="about"
-                  name="about"
                   placeholder={t("little_something_about")}
                   rows={3}
-                  defaultValue={props.user.bio || undefined}
                   className="mt-1 block w-full rounded-sm border-gray-300 shadow-sm sm:text-sm"></textarea>
               </div>
             </div>
-            <div>
-              <div className="mt-1 flex">
-                <Avatar
-                  alt={props.user.name || ""}
-                  className="relative h-10 w-10 rounded-full"
-                  gravatarFallbackMd5={props.user.emailMd5}
-                  imageSrc={imageSrc}
-                />
-                <input
-                  ref={avatarRef}
-                  type="hidden"
-                  name="avatar"
-                  id="avatar"
-                  placeholder="URL"
-                  className="mt-1 block w-full rounded-sm border border-gray-300 px-3 py-2 shadow-sm focus:border-neutral-800 focus:outline-none focus:ring-neutral-800 sm:text-sm"
-                  defaultValue={imageSrc}
-                />
-                <div className="flex items-center px-5">
-                  <ImageUploader
-                    target="avatar"
-                    id="avatar-upload"
-                    buttonMsg={t("change_avatar")}
-                    handleAvatarChange={(newAvatar) => {
-                      avatarRef.current.value = newAvatar;
-                      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-                        window.HTMLInputElement.prototype,
-                        "value"
-                      )?.set;
-                      nativeInputValueSetter?.call(avatarRef.current, newAvatar);
-                      const ev2 = new Event("input", { bubbles: true });
-                      avatarRef.current.dispatchEvent(ev2);
-                      updateProfileHandler(ev2 as unknown as FormEvent<HTMLFormElement>);
-                      setImageSrc(newAvatar);
-                    }}
-                    imageSrc={imageSrc}
+            <Controller
+              name="avatar"
+              render={({ field: { onChange, value } }) => (
+                <div className="mt-1 flex">
+                  <Avatar
+                    alt={user?.name || ""}
+                    className="relative h-10 w-10 rounded-full"
+                    imageSrc={value}
                   />
+                  <div className="flex items-center px-5">
+                    <ImageUploader
+                      target="avatar"
+                      id="avatar-upload"
+                      buttonMsg={t("change_avatar")}
+                      handleAvatarChange={(newAvatar) => {
+                        onChange(newAvatar);
+                        form.handleSubmit((values) => mutation.mutate(values));
+                      }}
+                      imageSrc={value}
+                    />
+                  </div>
                 </div>
-              </div>
-              <hr className="mt-6" />
-            </div>
+              )}
+            />
+            <hr className="mt-6" />
             <div>
-              <label htmlFor="language" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="locale" className="block text-sm font-medium text-gray-700">
                 {t("language")}
               </label>
               <div className="mt-1">
-                <Select
-                  id="languageSelect"
-                  value={selectedLanguage || props.localeProp}
-                  onChange={(v) => v && setSelectedLanguage(v)}
-                  className="mt-1 block w-full rounded-sm capitalize shadow-sm  sm:text-sm"
-                  options={localeOptions}
+                <Controller
+                  name="locale"
+                  render={({ field }) => (
+                    <LanguageSelect
+                      className="mt-1 block w-full rounded-sm capitalize shadow-sm  sm:text-sm"
+                      {...field}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -323,11 +339,16 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                 {t("timezone")}
               </label>
               <div className="mt-1">
-                <TimezoneSelect
-                  id="timeZone"
-                  value={selectedTimeZone}
-                  onChange={(v) => v && setSelectedTimeZone(v)}
-                  className="mt-1 block w-full rounded-sm shadow-sm sm:text-sm"
+                <Controller
+                  name="timeZone"
+                  render={({ field: { value, onChange } }) => (
+                    <TimezoneSelect
+                      id="timeZone"
+                      className="mt-1 block w-full rounded-sm shadow-sm sm:text-sm"
+                      onChange={(v) => onChange(v.value)}
+                      value={value}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -336,12 +357,17 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                 {t("time_format")}
               </label>
               <div className="mt-1">
-                <Select
-                  id="timeFormatSelect"
-                  value={selectedTimeFormat || props.user.timeFormat}
-                  onChange={(v) => v && setSelectedTimeFormat(v)}
-                  className="mt-1 block w-full rounded-sm  capitalize shadow-sm  sm:text-sm"
-                  options={timeFormatOptions}
+                <Controller
+                  name="timeFormat"
+                  render={({ field: { onChange, value } }) => (
+                    <I18nSelect
+                      id="timeFormat"
+                      value={value}
+                      onChange={(v) => v && onChange(v.value)}
+                      className="mt-1 block w-full rounded-sm  capitalize shadow-sm  sm:text-sm"
+                      options={TIME_FORMAT_OPTIONS}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -350,93 +376,62 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                 {t("first_day_of_week")}
               </label>
               <div className="mt-1">
-                <Select
-                  id="weekStart"
-                  value={selectedWeekStartDay}
-                  onChange={(v) => v && setSelectedWeekStartDay(v)}
-                  className="mt-1 block w-full rounded-sm capitalize shadow-sm sm:text-sm"
-                  options={[
-                    { value: "Sunday", label: nameOfDay(props.localeProp, 0) },
-                    { value: "Monday", label: nameOfDay(props.localeProp, 1) },
-                  ]}
+                <Controller
+                  name="weekStart"
+                  render={({ field: { onChange, value } }) => {
+                    const options = [
+                      { value: "Sunday", label: nameOfDay(props.localeProp, 0) },
+                      { value: "Monday", label: nameOfDay(props.localeProp, 1) },
+                    ];
+                    return (
+                      <Select
+                        id="weekStart"
+                        value={options.find((option) => option.value === value)}
+                        onChange={(v) => onChange(v?.value)}
+                        className="mt-1 block w-full rounded-sm capitalize shadow-sm sm:text-sm"
+                        options={options}
+                      />
+                    );
+                  }}
                 />
               </div>
             </div>
             <div className="relative mt-8 flex items-start">
-              <div className="flex h-5 items-center">
-                <input
-                  id="dynamic-group-booking"
-                  name="dynamic-group-booking"
-                  type="checkbox"
-                  ref={allowDynamicGroupBookingRef}
-                  defaultChecked={props.user.allowDynamicBooking || false}
-                  className="h-4 w-4 rounded-sm border-gray-300 text-neutral-900 "
-                />
-              </div>
-              <div className="text-sm ltr:ml-3 rtl:mr-3">
-                <label
-                  htmlFor="dynamic-group-booking"
-                  className="flex items-center font-medium text-gray-700">
-                  {t("allow_dynamic_booking")} <InfoBadge content={t("allow_dynamic_booking_tooltip")} />
-                </label>
-              </div>
+              <CheckboxField
+                {...register("allowDynamicBooking")}
+                informationIconText={t("allow_dynamic_booking_tooltip")}
+                description={t("allow_dynamic_booking")}
+                descriptionAsLabel
+              />
             </div>
             <div>
               <label htmlFor="theme" className="block text-sm font-medium text-gray-700">
                 {t("single_theme")}
               </label>
-              <div className="my-1">
-                <Select
-                  id="theme"
-                  isDisabled={!selectedTheme}
-                  defaultValue={selectedTheme || themeOptions[0]}
-                  value={selectedTheme || themeOptions[0]}
-                  onChange={(v) => v && setSelectedTheme(v)}
-                  className="mt-1 block w-full rounded-sm shadow-sm sm:text-sm"
-                  options={themeOptions}
-                />
-              </div>
-              <div className="relative mt-8 flex items-start">
-                <div className="flex h-5 items-center">
-                  <input
-                    id="theme-adjust-os"
-                    name="theme-adjust-os"
-                    type="checkbox"
-                    onChange={(e) => setSelectedTheme(e.target.checked ? undefined : themeOptions[0])}
-                    checked={!selectedTheme}
-                    className="h-4 w-4 rounded-sm border-gray-300 text-neutral-900 "
-                  />
-                </div>
-                <div className="text-sm ltr:ml-3 rtl:mr-3">
-                  <label htmlFor="theme-adjust-os" className="font-medium text-gray-700">
-                    {t("automatically_adjust_theme")}
-                  </label>
-                </div>
-              </div>
+              <Controller name="theme" render={({ field }) => <ThemeSelect {...field} />} />
             </div>
             <div className="block rtl:space-x-reverse sm:flex sm:space-x-2">
               <div className="mb-2 sm:w-1/2">
                 <label htmlFor="brandColor" className="block text-sm font-medium text-gray-700">
                   {t("light_brand_color")}
                 </label>
-                <ColorPicker defaultValue={props.user.brandColor} onChange={setBrandColor} />
+                <Controller name="brandColor" render={({ field }) => <ColorPicker {...field} />} />
               </div>
               <div className="mb-2 sm:w-1/2">
                 <label htmlFor="darkBrandColor" className="block text-sm font-medium text-gray-700">
                   {t("dark_brand_color")}
                 </label>
-                <ColorPicker defaultValue={props.user.darkBrandColor} onChange={setDarkBrandColor} />
+                <Controller name="darkBrandColor" render={({ field }) => <ColorPicker {...field} />} />
               </div>
             </div>
             <div>
               <div className="relative flex items-start">
                 <div className="flex h-5 items-center">
-                  <HideBrandingInput user={props.user} hideBrandingRef={hideBrandingRef} />
+                  <HideBrandingInput {...register("hideBranding")} user={user} />
                 </div>
                 <div className="text-sm ltr:ml-3 rtl:mr-3">
                   <label htmlFor="hide-branding" className="font-medium text-gray-700">
-                    {t("disable_cal_branding")}{" "}
-                    {props.user.plan !== "PRO" && <Badge variant="default">PRO</Badge>}
+                    {t("disable_cal_branding")} {user?.plan !== "PRO" && <Badge variant="default">PRO</Badge>}
                   </label>
                   <p className="text-gray-500">{t("disable_cal_branding_description")}</p>
                 </div>
@@ -464,7 +459,7 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
                         {t("confirm_delete_account")}
                       </Button>
                     }
-                    onConfirm={() => deleteAccount()}>
+                    onConfirm={() => deleteAccountMutation.mutate()}>
                     {t("delete_account_confirmation_message")}
                   </ConfirmationDialogContent>
                 </Dialog>
@@ -477,63 +472,17 @@ function SettingsView(props: ComponentProps<typeof Settings> & { localeProp: str
           <Button type="submit">{t("save")}</Button>
         </div>
       </div>
-    </form>
+    </Form>
   );
 }
 
 const WithQuery = withQuery(["viewer.i18n"]);
 
-export default function Settings(props: Props) {
+export default function Settings() {
   const { t } = useLocale();
-
   return (
     <SettingsShell heading={t("profile")} subtitle={t("edit_profile_info_description")}>
-      <WithQuery success={({ data }) => <SettingsView {...props} localeProp={data.locale} />} />
+      <WithQuery success={({ data }) => <SettingsView localeProp={data.locale} />} />
     </SettingsShell>
   );
 }
-
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  const session = await getSession(context);
-
-  if (!session?.user?.id) {
-    return { redirect: { permanent: false, destination: "/auth/login" } };
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      username: true,
-      name: true,
-      email: true,
-      bio: true,
-      avatar: true,
-      timeZone: true,
-      weekStart: true,
-      hideBranding: true,
-      theme: true,
-      plan: true,
-      brandColor: true,
-      darkBrandColor: true,
-      metadata: true,
-      timeFormat: true,
-      allowDynamicBooking: true,
-    },
-  });
-
-  if (!user) {
-    throw new Error("User seems logged in but cannot be found in the db");
-  }
-
-  return {
-    props: {
-      user: {
-        ...user,
-        emailMd5: crypto.createHash("md5").update(user.email).digest("hex"),
-      },
-    },
-  };
-};

@@ -6,11 +6,9 @@ import { z } from "zod";
 
 import getApps, { getLocationOptions } from "@calcom/app-store/utils";
 import { getCalendarCredentials, getConnectedCalendars } from "@calcom/core/CalendarManager";
-import { checkPremiumUsername } from "@calcom/ee/lib/core/checkPremiumUsername";
 import { bookingMinimalSelect } from "@calcom/prisma";
 import { RecurringEvent } from "@calcom/types/Calendar";
 
-import { checkRegularUsername } from "@lib/core/checkRegularUsername";
 import { sendFeedbackEmail } from "@lib/emails/email-manager";
 import jackson from "@lib/jackson";
 import prisma from "@lib/prisma";
@@ -23,22 +21,18 @@ import {
   samlTenantProduct,
   tenantPrefix,
 } from "@lib/saml";
-import slugify from "@lib/slugify";
 
 import { getTranslation } from "@server/lib/i18n";
 import { apiKeysRouter } from "@server/routers/viewer/apiKeys";
 import { availabilityRouter } from "@server/routers/viewer/availability";
 import { bookingsRouter } from "@server/routers/viewer/bookings";
 import { eventTypesRouter } from "@server/routers/viewer/eventTypes";
+import { profileRouter } from "@server/routers/viewer/profile";
 import { TRPCError } from "@trpc/server";
 
 import { createProtectedRouter, createRouter } from "../createRouter";
-import { resizeBase64Image } from "../lib/resizeBase64Image";
 import { viewerTeamsRouter } from "./viewer/teams";
 import { webhookRouter } from "./viewer/webhook";
-
-const checkUsername =
-  process.env.NEXT_PUBLIC_WEBSITE_URL === "https://cal.com" ? checkPremiumUsername : checkRegularUsername;
 
 // things that unauthenticated users can query about themselves
 const publicViewerRouter = createRouter()
@@ -75,26 +69,7 @@ const loggedInViewerRouter = createProtectedRouter()
       // Destructuring here only makes it more illegible
       // pick only the part we want to expose in the API
       return {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        email: user.email,
-        startTime: user.startTime,
-        endTime: user.endTime,
-        bufferTime: user.bufferTime,
-        locale: user.locale,
-        timeFormat: user.timeFormat,
-        avatar: user.avatar,
-        createdDate: user.createdDate,
-        trialEndsAt: user.trialEndsAt,
-        completedOnboarding: user.completedOnboarding,
-        twoFactorEnabled: user.twoFactorEnabled,
-        disableImpersonation: user.disableImpersonation,
-        identityProvider: user.identityProvider,
-        brandColor: user.brandColor,
-        darkBrandColor: user.darkBrandColor,
-        plan: user.plan,
-        away: user.away,
+        ...user,
       };
     },
   })
@@ -668,53 +643,6 @@ const loggedInViewerRouter = createProtectedRouter()
       };
     },
   })
-  .mutation("updateProfile", {
-    input: z.object({
-      username: z.string().optional(),
-      name: z.string().optional(),
-      email: z.string().optional(),
-      bio: z.string().optional(),
-      avatar: z.string().optional(),
-      timeZone: z.string().optional(),
-      weekStart: z.string().optional(),
-      hideBranding: z.boolean().optional(),
-      allowDynamicBooking: z.boolean().optional(),
-      brandColor: z.string().optional(),
-      darkBrandColor: z.string().optional(),
-      theme: z.string().optional().nullable(),
-      completedOnboarding: z.boolean().optional(),
-      locale: z.string().optional(),
-      timeFormat: z.number().optional(),
-      disableImpersonation: z.boolean().optional(),
-    }),
-    async resolve({ input, ctx }) {
-      const { user, prisma } = ctx;
-      const data: Prisma.UserUpdateInput = {
-        ...input,
-      };
-      if (input.username) {
-        const username = slugify(input.username);
-        // Only validate if we're changing usernames
-        if (username !== user.username) {
-          data.username = username;
-          const response = await checkUsername(username);
-          if (!response.available || ("premium" in response && response.premium)) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: response.message });
-          }
-        }
-      }
-      if (input.avatar) {
-        data.avatar = await resizeBase64Image(input.avatar);
-      }
-
-      await prisma.user.update({
-        where: {
-          id: user.id,
-        },
-        data,
-      });
-    },
-  })
   .mutation("eventTypeOrder", {
     input: z.object({
       ids: z.array(z.number()),
@@ -958,4 +886,5 @@ export const viewerRouter = createRouter()
   .merge("availability.", availabilityRouter)
   .merge("teams.", viewerTeamsRouter)
   .merge("webhook.", webhookRouter)
+  .merge("profile.", profileRouter)
   .merge("apiKeys.", apiKeysRouter);

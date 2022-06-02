@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from "react";
+import { forwardRef, useCallback, useRef, useState } from "react";
 import { useEffect } from "react";
 import { HexColorInput, HexColorPicker } from "react-colorful";
+import { Controller, UseFormRegisterReturn } from "react-hook-form";
 
 import { isValidHexCode, fallBackHex } from "@components/CustomBranding";
 import Swatch from "@components/Swatch";
@@ -56,44 +57,31 @@ function useOnClickOutside<T extends HTMLElement = HTMLElement>(
     handler(event);
   });
 }
-export type ColorPickerProps = {
-  defaultValue: string;
-  onChange: (text: string) => void;
-};
 
-const ColorPicker = (props: ColorPickerProps) => {
-  const init = !isValidHexCode(props.defaultValue)
-    ? fallBackHex(props.defaultValue, false)
-    : props.defaultValue;
-  const [color, setColor] = useState(init);
+const ColorPicker = ({ value, onChange }: { value: string; onChange: (newValue: string) => void }) => {
   const [isOpen, toggle] = useState(false);
   const popover = useRef() as React.MutableRefObject<HTMLInputElement>;
   const close = useCallback(() => toggle(false), []);
   useOnClickOutside(popover, close);
+
+  const color = !isValidHexCode(value) ? fallBackHex(value, false) : value;
   return (
     <div className="relative mt-1 flex items-center justify-center">
       <Swatch size="sm" backgroundColor={color} onClick={() => toggle(!isOpen)} />
-
       {isOpen && (
         <div className="popover" ref={popover}>
           <HexColorPicker
             className="!absolute !top-10 !left-0 !z-10 !h-32 !w-32"
             color={color}
-            onChange={(val) => {
-              setColor(val);
-              props.onChange(val);
-            }}
+            onChange={onChange}
           />
         </div>
       )}
       <HexColorInput
         className="ml-1 block w-full rounded-sm border border-gray-300 px-3 py-2 shadow-sm sm:text-sm"
         color={color}
-        onChange={(val) => {
-          setColor(val);
-          props.onChange(val);
-        }}
         type="text"
+        onChange={onChange}
       />
     </div>
   );
