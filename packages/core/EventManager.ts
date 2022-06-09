@@ -3,8 +3,6 @@ import async from "async";
 import merge from "lodash/merge";
 import { v5 as uuidv5 } from "uuid";
 
-
-
 import { FAKE_DAILY_CREDENTIAL } from "@calcom/app-store/dailyvideo/lib/VideoApiAdapter";
 import getApps from "@calcom/app-store/utils";
 import logger from "@calcom/lib/logger";
@@ -21,7 +19,6 @@ import type { VideoCallData } from "@calcom/types/VideoApiAdapter";
 import { createEvent, getConnectedCalendars, updateEvent } from "./CalendarManager";
 import { LocationType } from "./location";
 import { createMeeting, updateMeeting } from "./videoClient";
-
 
 export type Event = AdditionalInformation & VideoCallData;
 
@@ -312,8 +309,8 @@ export default class EventManager {
               ...event,
               destinationCalendar: {
                 ...event.destinationCalendar,
-                externalId: "Your google calendar emil",
-             },
+                externalId: "Your google calendar emil"
+              }
             })
         );
       }
