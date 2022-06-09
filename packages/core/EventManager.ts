@@ -10,10 +10,13 @@ import getApps from "@calcom/app-store/utils";
 import logger from "@calcom/lib/logger";
 import prisma from "@calcom/prisma";
 import type { AdditionalInformation, CalendarEvent } from "@calcom/types/Calendar";
-import type { CreateUpdateResult, EventResult, PartialBooking, PartialReference } from "@calcom/types/EventManager";
+import type {
+  CreateUpdateResult,
+  EventResult,
+  PartialBooking,
+  PartialReference,
+} from "@calcom/types/EventManager";
 import type { VideoCallData } from "@calcom/types/VideoApiAdapter";
-
-
 
 import { createEvent, getConnectedCalendars, updateEvent } from "./CalendarManager";
 import { LocationType } from "./location";
@@ -309,8 +312,8 @@ export default class EventManager {
               ...event,
               destinationCalendar: {
                 ...event.destinationCalendar,
-                externalId: "Your google calendar email"
-              }
+                externalId: "Your google calendar emil",
+             },
             })
         );
       }
