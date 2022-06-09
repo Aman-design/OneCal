@@ -5,8 +5,11 @@ import type { Time } from "ical.js";
 import type { TFunction } from "next-i18next";
 import type { Frequency as RRuleFrequency } from "rrule";
 
+
+
 import type { Event } from "./Event";
 import type { Ensure } from "./utils";
+
 
 type PaymentInfo = {
   link?: string | null;
@@ -105,6 +108,7 @@ export interface CalendarEvent {
   additionalNotes?: string | null;
   customInputs?: Prisma.JsonObject | null;
   description?: string | null;
+  requiresConfirmation?: boolean | null;
   team?: {
     name: string;
     members: string[];

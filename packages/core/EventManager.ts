@@ -3,21 +3,22 @@ import async from "async";
 import merge from "lodash/merge";
 import { v5 as uuidv5 } from "uuid";
 
+
+
 import { FAKE_DAILY_CREDENTIAL } from "@calcom/app-store/dailyvideo/lib/VideoApiAdapter";
 import getApps from "@calcom/app-store/utils";
+import logger from "@calcom/lib/logger";
 import prisma from "@calcom/prisma";
 import type { AdditionalInformation, CalendarEvent } from "@calcom/types/Calendar";
-import type {
-  CreateUpdateResult,
-  EventResult,
-  PartialBooking,
-  PartialReference,
-} from "@calcom/types/EventManager";
+import type { CreateUpdateResult, EventResult, PartialBooking, PartialReference } from "@calcom/types/EventManager";
 import type { VideoCallData } from "@calcom/types/VideoApiAdapter";
 
-import { createEvent, updateEvent } from "./CalendarManager";
+
+
+import { createEvent, getConnectedCalendars, updateEvent } from "./CalendarManager";
 import { LocationType } from "./location";
 import { createMeeting, updateMeeting } from "./videoClient";
+
 
 export type Event = AdditionalInformation & VideoCallData;
 
@@ -55,6 +56,7 @@ export const isDedicatedIntegration = (location: string): boolean => {
     isTeams(location)
   );
 };
+const log = logger.getChildLogger({ prefix: ["[api] book:user"] });
 
 export const getLocationRequestFromIntegration = (location: string) => {
   if (
@@ -285,14 +287,42 @@ export default class EventManager {
    * @param noMail
    * @private
    */
+
   private async createAllCalendarEvents(event: CalendarEvent): Promise<Array<EventResult>> {
+    const baseEvent = event;
     /** Can I use destinationCalendar here? */
     /* How can I link a DC to a cred? */
     if (event.destinationCalendar) {
+      const googleCalendarCredentials = this.calendarCredentials.filter((c) => c.type === "google_calendar");
+      /** Check if we have Google calendar credentials (user has gcal attached to account, but it's
+       not the default for this event type)_*/
+      // TODO: Find a way to do this without creating the event on the gcal if it isnt the selected destination calendar
+      let gcalEvent;
+      if (
+        googleCalendarCredentials &&
+        event.location === "integrations:google:meet" &&
+        event.destinationCalendar?.integration !== "integrations:google:meet"
+      ) {
+        gcalEvent = await googleCalendarCredentials.map(
+          async (c) =>
+            await createEvent(c, {
+              ...event,
+              destinationCalendar: {
+                ...event.destinationCalendar,
+                externalId: "Your google calendar email"
+              }
+            })
+        );
+      }
       const destinationCalendarCredentials = this.calendarCredentials.filter(
         (c) => c.type === event.destinationCalendar?.integration
       );
-      return Promise.all(destinationCalendarCredentials.map(async (c) => await createEvent(c, event)));
+      return Promise.all(
+        destinationCalendarCredentials.map(
+          async (c) =>
+            await createEvent(c, { ...event, additionalInformation: { hangoutLink: gcalEvent.hangoutLink } })
+        )
+      );
     }
 
     /**
