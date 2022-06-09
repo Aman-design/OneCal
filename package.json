@@ -6,7 +6,8 @@
     "apps/*",
     "packages/*",
     "packages/embeds/*",
-    "packages/app-store/*"
+    "packages/app-store/*",
+    "packages/Design/*"
   ],
   "scripts": {
     "build": "turbo run build --scope=\"@calcom/web\" --include-dependencies",
@@ -69,7 +70,7 @@
     ]
   },
   "engines": {
-    "node": ">=14.x <15",
+    "node": ">=14.x <=16",
     "npm": ">=7.0.0",
     "yarn": ">=1.19.0 < 2.0.0"
   },
