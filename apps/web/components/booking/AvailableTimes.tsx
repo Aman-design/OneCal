@@ -60,75 +60,81 @@ const AvailableTimes: FC<AvailableTimesProps> = ({
       <div className="flex-grow overflow-y-auto md:h-[364px]">
         {slots?.length > 0 &&
           slots.map((slot) => {
-            type BookingURL = {
-              pathname: string;
-              query: Record<string, string | number | string[] | undefined>;
-            };
-            const bookingUrl: BookingURL = {
-              pathname: "book",
-              query: {
-                ...router.query,
-                date: dayjs(slot.time).format(),
-                type: eventTypeId,
-                slug: eventTypeSlug,
-                /** Treat as recurring only when a count exist and it's not a rescheduling workflow */
-                count: recurringCount && !rescheduleUid ? recurringCount : undefined,
-              },
-            };
+            if (
+              dayjs(date).startOf("day") <= dayjs(slot.time) &&
+              dayjs(slot.time) <= dayjs(date).endOf("day")
+            ) {
+              type BookingURL = {
+                pathname: string;
+                query: Record<string, string | number | string[] | undefined>;
+              };
+              const bookingUrl: BookingURL = {
+                pathname: "book",
+                query: {
+                  ...router.query,
+                  date: dayjs(slot.time).format(),
+                  type: eventTypeId,
+                  slug: eventTypeSlug,
+                  /** Treat as recurring only when a count exist and it's not a rescheduling workflow */
+                  count: recurringCount && !rescheduleUid ? recurringCount : undefined,
+                },
+              };
 
-            if (rescheduleUid) {
-              bookingUrl.query.rescheduleUid = rescheduleUid as string;
-            }
+              if (rescheduleUid) {
+                bookingUrl.query.rescheduleUid = rescheduleUid as string;
+              }
 
-            if (schedulingType === SchedulingType.ROUND_ROBIN) {
-              bookingUrl.query.user = slot.users;
-            }
+              if (schedulingType === SchedulingType.ROUND_ROBIN) {
+                bookingUrl.query.user = slot.users;
+              }
 
-            // If event already has an attendee add booking id
-            if (slot.bookingUid) {
-              bookingUrl.query.bookingUid = slot.bookingUid;
-            }
+              // If event already has an attendee add booking id
+              if (slot.bookingUid) {
+                bookingUrl.query.bookingUid = slot.bookingUid;
+              }
 
-            return (
-              <div key={dayjs(slot.time).format()}>
-                {/* Current there is no way to disable Next.js Links */}
-                {seatsPerTimeSlot && slot.attendees && slot.attendees >= seatsPerTimeSlot ? (
-                  <div
-                    className={classNames(
-                      "text-primary-500 mb-2 block rounded-sm border bg-white py-4 font-medium opacity-25  dark:border-transparent dark:bg-gray-600 dark:text-neutral-200 ",
-                      brand === "#fff" || brand === "#ffffff" ? "border-brandcontrast" : "border-brand"
-                    )}>
-                    {dayjs(slot.time).tz(timeZone()).format(timeFormat)}
-                    {!!seatsPerTimeSlot && <p className={`text-sm`}>{t("booking_full")}</p>}
-                  </div>
-                ) : (
-                  <Link href={bookingUrl}>
-                    <a
+              return (
+                <div key={dayjs(slot.time).format()}>
+                  {/* Current there is no way to disable Next.js Links */}
+                  {seatsPerTimeSlot && slot.attendees && slot.attendees >= seatsPerTimeSlot ? (
+                    <div
                       className={classNames(
-                        "text-primary-500 hover:bg-brand hover:text-brandcontrast dark:hover:bg-darkmodebrand dark:hover:text-darkmodebrandcontrast mb-2 block rounded-sm border bg-white py-4 font-medium hover:text-white dark:border-transparent dark:bg-gray-600 dark:text-neutral-200 dark:hover:border-black",
+                        "text-primary-500 mb-2 block rounded-sm border bg-white py-4 font-medium opacity-25  dark:border-transparent dark:bg-gray-600 dark:text-neutral-200 ",
                         brand === "#fff" || brand === "#ffffff" ? "border-brandcontrast" : "border-brand"
-                      )}
-                      data-testid="time">
+                      )}>
                       {dayjs(slot.time).tz(timeZone()).format(timeFormat)}
-                      {!!seatsPerTimeSlot && (
-                        <p
-                          className={`${
-                            slot.attendees && slot.attendees / seatsPerTimeSlot >= 0.8
-                              ? "text-rose-600"
-                              : slot.attendees && slot.attendees / seatsPerTimeSlot >= 0.33
-                              ? "text-yellow-500"
-                              : "text-emerald-400"
-                          } text-sm`}>
-                          {slot.attendees ? seatsPerTimeSlot - slot.attendees : seatsPerTimeSlot} /{" "}
-                          {seatsPerTimeSlot} {t("seats_available")}
-                        </p>
-                      )}
-                    </a>
-                  </Link>
-                )}
-              </div>
-            );
+                      {!!seatsPerTimeSlot && <p className={`text-sm`}>{t("booking_full")}</p>}
+                    </div>
+                  ) : (
+                    <Link href={bookingUrl}>
+                      <a
+                        className={classNames(
+                          "text-primary-500 hover:bg-brand hover:text-brandcontrast dark:hover:bg-darkmodebrand dark:hover:text-darkmodebrandcontrast mb-2 block rounded-sm border bg-white py-4 font-medium hover:text-white dark:border-transparent dark:bg-gray-600 dark:text-neutral-200 dark:hover:border-black",
+                          brand === "#fff" || brand === "#ffffff" ? "border-brandcontrast" : "border-brand"
+                        )}
+                        data-testid="time">
+                        {dayjs(slot.time).tz(timeZone()).format(timeFormat)}
+                        {!!seatsPerTimeSlot && (
+                          <p
+                            className={`${
+                              slot.attendees && slot.attendees / seatsPerTimeSlot >= 0.8
+                                ? "text-rose-600"
+                                : slot.attendees && slot.attendees / seatsPerTimeSlot >= 0.33
+                                ? "text-yellow-500"
+                                : "text-emerald-400"
+                            } text-sm`}>
+                            {slot.attendees ? seatsPerTimeSlot - slot.attendees : seatsPerTimeSlot} /{" "}
+                            {seatsPerTimeSlot} {t("seats_available")}
+                          </p>
+                        )}
+                      </a>
+                    </Link>
+                  )}
+                </div>
+              );
+            }
           })}
+
         {!slots.length && (
           <div className="-mt-4 flex h-full w-full flex-col content-center items-center justify-center">
             <h1 className="my-6 text-xl text-black dark:text-white">{t("all_booked_today")}</h1>
