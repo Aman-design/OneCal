@@ -1,6 +1,6 @@
 import { UserPlan } from "@prisma/client";
 import dayjs from "dayjs";
-import { GetStaticPropsContext, GetStaticPaths } from "next";
+import { GetStaticPropsContext, GetStaticPaths, GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { JSONObject } from "superjson/dist/types";
@@ -18,7 +18,7 @@ import { inferSSRProps } from "@lib/types/inferSSRProps";
 
 import AvailabilityPage from "@components/booking/pages/AvailabilityPage";
 
-export type AvailabilityPageProps = inferSSRProps<typeof getStaticProps>;
+export type AvailabilityPageProps = inferSSRProps<typeof getServerSideProps>;
 
 export default function Type(props: AvailabilityPageProps) {
   const { t } = useLocale();
@@ -200,7 +200,7 @@ async function getUserPageProps(context: GetStaticPropsContext) {
       isDynamic: false,
       trpcState: ssg.dehydrate(),
     },
-    revalidate: 10, // seconds
+    // revalidate: 10, // seconds
   };
 }
 
@@ -302,8 +302,7 @@ async function getDynamicGroupPageProps(context: GetStaticPropsContext) {
 
 const paramsSchema = z.object({ type: z.string(), user: z.string() });
 
-export const getStaticProps = async (context: GetStaticPropsContext) => {
-  console.log("STATIC CALL", context.params);
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const { user: userParam } = paramsSchema.parse(context.params);
   // dynamic groups are not generated at build time, but otherwise are probably cached until infinity.
   const isDynamicGroup = userParam.includes("+");
@@ -312,8 +311,4 @@ export const getStaticProps = async (context: GetStaticPropsContext) => {
   } else {
     return await getUserPageProps(context);
   }
-};
-
-export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: "blocking" };
 };
