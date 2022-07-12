@@ -156,7 +156,7 @@ export default class EventManager {
    *
    * @param event
    */
-  public async reschedule(
+  public async update(
     event: CalendarEvent,
     rescheduleUid: string,
     newBookingId?: number,
@@ -264,10 +264,6 @@ export default class EventManager {
       results,
       referencesToCreate: [...booking.references],
     };
-  }
-
-  public async updateCalendarAttendees(event: CalendarEvent, booking: PartialBooking) {
-    await this.updateAllCalendarEvents(event, booking);
   }
 
   /**
