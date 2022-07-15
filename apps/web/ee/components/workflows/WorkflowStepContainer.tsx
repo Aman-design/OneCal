@@ -199,6 +199,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                         className="mt-3 block w-full min-w-0 flex-1 rounded-sm"
                         onChange={(val) => {
                           if (val) {
+                            setEditCounter(0);
                             if (val.value === WorkflowActions.SMS_NUMBER) {
                               setIsPhoneNumberNeeded(true);
                               setEditNumberMode(true);
@@ -206,7 +207,6 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                             } else {
                               setIsPhoneNumberNeeded(false);
                               setEditNumberMode(false);
-                              setEditCounter(editCounter - 1);
                             }
 
                             if (
@@ -214,7 +214,11 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                               val.value === WorkflowActions.EMAIL_HOST
                             ) {
                               setIsEmailSubjectNeeded(true);
-                              if (!form.getValues(`steps.${step.stepNumber - 1}.emailSubject`)) {
+                              if (
+                                !form.getValues(`steps.${step.stepNumber - 1}.emailSubject`) &&
+                                form.getValues(`steps.${step.stepNumber - 1}.template`) ===
+                                  WorkflowTemplates.CUSTOM
+                              ) {
                                 setEditEmailBodyMode(true);
                                 setEditCounter(editCounter + 1);
                               }
