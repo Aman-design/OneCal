@@ -56,6 +56,7 @@ export default function AppPage(props: inferSSRProps<typeof getServerSideProps>)
   if (!route || route.notFound) {
     throw new Error("Route can't be undefined");
   }
+  AppPage.isThemeSupported = route.Component.isThemeSupported;
   return <route.Component {...componentProps} />;
 }
 

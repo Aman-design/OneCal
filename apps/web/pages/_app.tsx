@@ -44,7 +44,7 @@ function MyApp(props: AppProps) {
             <script dangerouslySetInnerHTML={{ __html: `window.CalComPageStatus = '${pageStatus}'` }} />
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
           </Head>
-          <ThemeProvider attribute="class">
+          <ThemeProvider forcedTheme={Component.isThemeSupported ? null : "light"} attribute="class">
             {Component.requiresLicense ? (
               <LicenseRequired>
                 <Component {...pageProps} err={err} />
