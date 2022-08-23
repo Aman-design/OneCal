@@ -7,7 +7,7 @@ import { Button } from "../../core";
 type EmbedButtonProps<T> = {
   embedUrl: string;
   children?: React.ReactNode;
-  className: string;
+  className?: string;
   as?: T;
 };
 
@@ -19,7 +19,7 @@ export const EmbedButton = <T extends React.ElementType>({
   ...props
 }: EmbedButtonProps<T> & React.ComponentPropsWithoutRef<T>) => {
   const router = useRouter();
-  className = classNames(className, "hidden lg:flex");
+  className = classNames(className);
   const openEmbedModal = () => {
     const query = {
       ...router.query,

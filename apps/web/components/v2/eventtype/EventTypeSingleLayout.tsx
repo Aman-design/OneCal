@@ -31,6 +31,7 @@ import Shell from "@calcom/ui/v2/core/Shell";
 import { EmbedButton } from "@calcom/ui/v2/modules/embed";
 
 import { ClientSuspense } from "@components/ClientSuspense";
+import { EmbedDialog } from "@components/Embed";
 
 type Props = {
   children: React.ReactNode;
@@ -148,6 +149,9 @@ function EventTypeSingleLayout({
   const permalink = `${CAL_URL}/${team ? `team/${team.slug}` : eventType.users[0].username}/${
     eventType.slug
   }`;
+
+  const embedLink = `${team ? `team/${team.slug}` : eventType.users[0].username}/${eventType.slug}`;
+
   return (
     <Shell
       title={t("event_type_title", { eventTypeTitle: eventType.title })}
@@ -190,15 +194,14 @@ function EventTypeSingleLayout({
                 showToast("Link copied!", "success");
               }}
             />
-            {/* <EmbedButton
-              color="minimal"
-              size="sm"
+            {/* <Button StartIcon={Icon.FiCode} color="secondary" size="icon" /> */}
+            <EmbedButton<typeof Button>
+              color="secondary"
+              size="icon"
               type="button"
               StartIcon={Icon.FiCode}
-              className={classNames("w-full rounded-none")}
-              embedUrl={encodeURIComponent(embedLink)}>
-              {t("embed")}
-            </EmbedButton> */}
+              embedUrl={encodeURIComponent(embedLink)}
+            />
             <Button
               color="secondary"
               size="icon"
@@ -278,6 +281,7 @@ function EventTypeSingleLayout({
           {t("delete_event_type_description") as string}
         </ConfirmationDialogContent>
       </Dialog>
+      <EmbedDialog />
     </Shell>
   );
 }

@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { createRef, forwardRef, MutableRefObject, RefObject, useRef, useState } from "react";
 import { components, ControlProps } from "react-select";
 
-import { EMBED_LIB_URL, WEBAPP_URL } from "@calcom/lib/config/constants";
+import { WEBAPP_URL, EMBED_LIB_URL } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import showToast from "@calcom/lib/notification";
 import { Dialog, DialogClose, DialogContent } from "@calcom/ui/Dialog";
