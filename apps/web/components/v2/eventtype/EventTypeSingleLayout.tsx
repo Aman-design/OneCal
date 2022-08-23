@@ -28,6 +28,7 @@ import Dropdown, {
   DropdownMenuTrigger,
 } from "@calcom/ui/v2/core/Dropdown";
 import Shell from "@calcom/ui/v2/core/Shell";
+import { EmbedButton } from "@calcom/ui/v2/modules/embed";
 
 import { ClientSuspense } from "@components/ClientSuspense";
 
@@ -147,7 +148,6 @@ function EventTypeSingleLayout({
   const permalink = `${CAL_URL}/${team ? `team/${team.slug}` : eventType.users[0].username}/${
     eventType.slug
   }`;
-
   return (
     <Shell
       title={t("event_type_title", { eventTypeTitle: eventType.title })}
@@ -190,7 +190,15 @@ function EventTypeSingleLayout({
                 showToast("Link copied!", "success");
               }}
             />
-            <Button color="secondary" size="icon" StartIcon={Icon.FiCode} combined />
+            {/* <EmbedButton
+              color="minimal"
+              size="sm"
+              type="button"
+              StartIcon={Icon.FiCode}
+              className={classNames("w-full rounded-none")}
+              embedUrl={encodeURIComponent(embedLink)}>
+              {t("embed")}
+            </EmbedButton> */}
             <Button
               color="secondary"
               size="icon"

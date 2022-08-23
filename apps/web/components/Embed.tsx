@@ -4,18 +4,13 @@ import { useRouter } from "next/router";
 import { createRef, forwardRef, MutableRefObject, RefObject, useRef, useState } from "react";
 import { components, ControlProps } from "react-select";
 
+import { EMBED_LIB_URL, WEBAPP_URL } from "@calcom/lib/config/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import showToast from "@calcom/lib/notification";
-import { Button, Switch } from "@calcom/ui";
 import { Dialog, DialogClose, DialogContent } from "@calcom/ui/Dialog";
 import { Icon } from "@calcom/ui/Icon";
-import { InputLeading, Label, TextArea, TextField } from "@calcom/ui/form/fields";
-
-import { EMBED_LIB_URL, WEBAPP_URL } from "@lib/config/constants";
-
-import NavTabs from "@components/NavTabs";
-import ColorPicker from "@components/ui/colorpicker";
-import Select from "@components/ui/form/Select";
+import { Button, Switch, Select, ColorPicker, HorizontalTabs } from "@calcom/ui/v2";
+import { Label, TextArea, TextField } from "@calcom/ui/v2/core/form/fields";
 
 type EmbedType = "inline" | "floating-popup" | "element-click";
 type EmbedFramework = "react" | "HTML";
@@ -603,7 +598,7 @@ const ChooseEmbedTypesDialogContent = () => {
       <div className="flex items-start">
         {embeds.map((embed, index) => (
           <button
-            className="mr-2 w-1/3 border border-transparent p-3 text-left hover:rounded-md hover:border-gray-200 hover:bg-neutral-100"
+            className="mr-2 w-1/3 rounded-md border border-transparent border-gray-200 p-4 text-left hover:rounded-md hover:bg-neutral-100"
             key={index}
             data-testid={embed.type}
             onClick={() => {
@@ -823,11 +818,11 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
               <CollapsibleContent className="text-sm">
                 <div className={classNames("mt-6", embedType === "inline" ? "block" : "hidden")}>
                   {/*TODO: Add Auto/Fixed toggle from Figma */}
-                  <div className="text-sm">Embed Window Sizing</div>
+                  <div className="pb-2 text-sm text-gray-600">Embed Window Sizing</div>
                   <div className="justify-left flex items-center">
                     <TextField
                       name="width"
-                      labelProps={{ className: "hidden" }}
+                      labelSrOnly
                       required
                       value={previewState.inline.width}
                       onChange={(e) => {
@@ -843,11 +838,11 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                           };
                         });
                       }}
-                      addOnLeading={<InputLeading>W</InputLeading>}
+                      addOnLeading={<>W</>}
                     />
                     <span className="p-2">×</span>
                     <TextField
-                      labelProps={{ className: "hidden" }}
+                      labelSrOnly
                       name="height"
                       value={previewState.inline.height}
                       required
@@ -864,20 +859,15 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                           };
                         });
                       }}
-                      addOnLeading={<InputLeading>H</InputLeading>}
+                      addOnLeading={<>H</>}
                     />
                   </div>
                 </div>
-                <div
-                  className={classNames(
-                    "mt-4 items-center justify-between",
-                    embedType === "floating-popup" ? "flex" : "hidden"
-                  )}>
-                  <div className="text-sm">Button Text</div>
+                <div className={classNames("mt-6 ", embedType === "floating-popup" ? "flex " : "hidden")}>
                   {/* Default Values should come from preview iframe */}
                   <TextField
                     name="buttonText"
-                    labelProps={{ className: "hidden" }}
+                    label="Button Text"
                     onChange={(e) => {
                       setPreviewState((previewState) => {
                         return {
@@ -895,10 +885,9 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                 </div>
                 <div
                   className={classNames(
-                    "mt-4 flex items-center justify-between",
+                    "mt-4 flex items-center ",
                     embedType === "floating-popup" ? "flex" : "hidden"
                   )}>
-                  <div className="text-sm">Display Calendar Icon Button</div>
                   <Switch
                     defaultChecked={true}
                     onCheckedChange={(checked) => {
@@ -913,14 +902,18 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       });
                     }}
                   />
+                  <div className="ml-2 text-sm">Display Calendar Icon Button</div>
                 </div>
                 <div
                   className={classNames(
-                    "mt-4 flex items-center justify-between",
+                    "mt-6 flex flex-col ",
                     embedType === "floating-popup" ? "flex" : "hidden"
                   )}>
-                  <div>Position of Button</div>
+                  <Label htmlFor="selectPositionOfButton" className="">
+                    Position of Button
+                  </Label>
                   <Select
+                    id="selectPositionOfButton"
                     onChange={(position) => {
                       setPreviewState((previewState) => {
                         return {
@@ -941,9 +934,10 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                     "mt-4 flex items-center justify-between",
                     embedType === "floating-popup" ? "flex" : "hidden"
                   )}>
-                  <div>Button Color</div>
-                  <div className="w-36">
+                  <div className="w-full">
+                    <Label htmlFor="buttonColor">Button Color</Label>
                     <ColorPicker
+                      id="buttonColor"
                       defaultValue="#000000"
                       onChange={(color) => {
                         setPreviewState((previewState) => {
@@ -964,9 +958,10 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                     "mt-4 flex items-center justify-between",
                     embedType === "floating-popup" ? "flex" : "hidden"
                   )}>
-                  <div>Text Color</div>
-                  <div className="w-36">
+                  <div className="w-full">
+                    <Label htmlFor="textColor">Text Color</Label>
                     <ColorPicker
+                      id="textColor"
                       defaultValue="#000000"
                       onChange={(color) => {
                         setPreviewState((previewState) => {
@@ -1000,10 +995,10 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="mt-6 text-sm">
-                  <Label className="flex items-center justify-between">
-                    <div>Theme</div>
+                  <div className="">
+                    <Label>Theme</Label>
                     <Select
-                      className="w-36"
+                      className=""
                       defaultValue={ThemeOptions[0]}
                       components={{
                         Control: ThemeSelectControl,
@@ -1021,7 +1016,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       }}
                       options={ThemeOptions}
                     />
-                  </Label>
+                  </div>
                   {[
                     { name: "brandColor", title: "Brand Color" },
                     // { name: "lightColor", title: "Light Color" },
@@ -1030,10 +1025,11 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                     // { name: "highlightColor", title: "Highlight Color" },
                     // { name: "medianColor", title: "Median Color" },
                   ].map((palette) => (
-                    <Label key={palette.name} className="flex items-center justify-between">
-                      <div>{palette.title}</div>
-                      <div className="w-36">
+                    <div key={palette.name} className="mt-6">
+                      <Label htmlFor={`${palette.name}-input`}>{palette.title}</Label>
+                      <div className="w-full">
                         <ColorPicker
+                          id={`${palette.name}-input`}
                           defaultValue="#000000"
                           onChange={(color) => {
                             addToPalette({
@@ -1042,7 +1038,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                           }}
                         />
                       </div>
-                    </Label>
+                    </div>
                   ))}
                 </div>
               </CollapsibleContent>
@@ -1050,7 +1046,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
           </div>
         </div>
         <div className="w-2/3 bg-gray-50 p-6">
-          <NavTabs data-testid="embed-tabs" tabs={tabs} linkProps={{ shallow: true }} />
+          <HorizontalTabs data-testid="embed-tabs" tabs={tabs} linkProps={{ shallow: true }} />
           {tabs.map((tab) => {
             return (
               <div

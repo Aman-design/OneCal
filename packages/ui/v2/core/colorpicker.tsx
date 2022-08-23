@@ -59,6 +59,7 @@ function useOnClickOutside<T extends HTMLElement = HTMLElement>(
 export type ColorPickerProps = {
   defaultValue: string;
   onChange: (text: string) => void;
+  id?: string;
 };
 
 const ColorPicker = (props: ColorPickerProps) => {
@@ -87,6 +88,7 @@ const ColorPicker = (props: ColorPickerProps) => {
         </div>
       )}
       <HexColorInput
+        id={props.id}
         className="ml-1 block w-full rounded-r-md border border-gray-300 px-3 py-2 sm:text-sm"
         color={color}
         onChange={(val) => {
