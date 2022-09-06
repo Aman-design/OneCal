@@ -191,7 +191,9 @@ function WorkflowPage() {
         CTA={
           !isFreeUser && (
             <div>
-              <Button type="submit">{t("save")}</Button>
+              <Button type="submit" loading={updateMutation.isLoading}>
+                {t("save")}
+              </Button>
             </div>
           )
         }
