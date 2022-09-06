@@ -67,14 +67,16 @@ export default function EmptyScreen({
             {description}
           </p>
           {buttonOnClick && buttonText && (
-            <Button
-              type="button"
-              StartIcon={Icon.FiPlus}
-              onClick={(e) => buttonOnClick(e)}
-              loading={isLoading}
-              className="mt-8">
-              {buttonText}
-            </Button>
+            <div className="flex items-center justify-center">
+              <Button
+                type="button"
+                StartIcon={Icon.FiPlus}
+                onClick={(e) => buttonOnClick(e)}
+                loading={isLoading}
+                className="mt-8 ">
+                {buttonText}
+              </Button>
+            </div>
           )}
         </div>
       </div>
