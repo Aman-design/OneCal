@@ -322,15 +322,6 @@ export const EditLocationDialog = (props: ISetLocationDialog) => {
               }}
             />
             {selectedLocation && LocationOptions}
-            <p className="text-sm text-gray-400">
-              {t("cant_find_the_right_video_app")}
-              <Link href="/apps/categories/video" passHref>
-                <a target="_blank" className="text-blue-400">
-                  {" "}
-                  {t("app_store")}.
-                </a>
-              </Link>
-            </p>
             <div className="mt-4 flex justify-end space-x-2">
               <Button
                 onClick={() => {
