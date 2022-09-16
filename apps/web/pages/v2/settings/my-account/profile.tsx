@@ -3,6 +3,7 @@ import { signOut } from "next-auth/react";
 import { useRef, useState, BaseSyntheticEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { UsernameAvailability } from "@calcom/features/settings/PremiumTextfield";
 import { ErrorCode } from "@calcom/lib/auth";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { TRPCClientErrorLike } from "@calcom/trpc/client";
@@ -61,6 +62,8 @@ const ProfileView = () => {
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [hasDeleteErrors, setHasDeleteErrors] = useState(false);
   const [deleteErrorMessage, setDeleteErrorMessage] = useState("");
+  const [currentUsername, setCurrentUsername] = useState(user?.username || undefined);
+  const [inputUsernameValue, setInputUsernameValue] = useState(currentUsername);
 
   const form = useForm<DeleteAccountValues>();
 
@@ -117,6 +120,8 @@ const ProfileView = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const passwordRef = useRef<HTMLInputElement>(null!);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const usernameRef = useRef<HTMLInputElement>(null!);
 
   const errorMessages: { [key: string]: string } = {
     [ErrorCode.SecondFactorRequired]: t("2fa_enabled_instructions"),
@@ -164,6 +169,16 @@ const ProfileView = () => {
           name="username"
           render={({ field: { value } }) => (
             <div className="mt-8">
+              <UsernameAvailability
+                currentUsername={currentUsername}
+                setCurrentUsername={setCurrentUsername}
+                inputUsernameValue={inputUsernameValue}
+                usernameRef={usernameRef}
+                setInputUsernameValue={setInputUsernameValue}
+                onSuccessMutation={onSuccessMutation}
+                onErrorMutation={onErrorMutation}
+                user={user}
+              />
               <TextField
                 data-testid="username-input"
                 name="username"
