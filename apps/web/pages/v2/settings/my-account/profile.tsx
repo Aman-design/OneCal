@@ -3,6 +3,7 @@ import { signOut } from "next-auth/react";
 import { useRef, useState, BaseSyntheticEvent } from "react";
 import { Controller, useForm } from "react-hook-form";
 
+import { classNames } from "@calcom/lib";
 import { ErrorCode } from "@calcom/lib/auth";
 import { WEBSITE_URL } from "@calcom/lib/constants";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
@@ -127,7 +128,6 @@ const ProfileView = () => {
   const formMethods = useForm({
     defaultValues: {
       avatar: user?.avatar || "",
-      username: user?.username || "",
       name: user?.name || "",
       email: user?.email || "",
       bio: user?.bio || "",
@@ -186,8 +186,12 @@ const ProfileView = () => {
           <TextField
             data-testid="username-input"
             label={t("personal_cal_url")}
+            value={user?.username || ""}
             addOnLeading={WEBSITE_URL + "/"}
-            {...formMethods.register("username")}
+            readOnly
+            disabled
+            // @TODO: this style is for disabled input, should change once we fix username availability on v2
+            className={classNames("bg-gray-100 text-gray-400 focus:border-0")}
           />
         </div>
         <div className="mt-8">
