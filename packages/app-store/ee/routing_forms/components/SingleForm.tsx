@@ -7,6 +7,7 @@ import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
 import { Icon } from "@calcom/ui";
 import { Form } from "@calcom/ui/form/fields";
+import { DropdownMenuSeparator } from "@calcom/ui/v2";
 import { showToast } from "@calcom/ui/v2";
 import { ButtonGroup, TextAreaField, TextField, Tooltip, Button, VerticalDivider } from "@calcom/ui/v2";
 import Meta from "@calcom/ui/v2/core/Meta";
@@ -155,6 +156,7 @@ const Actions = ({
               {t("Copy Typeform Redirect Url")}
             </FormAction>
           ) : null}
+          <DropdownMenuSeparator className="h-px bg-gray-200" />
           <FormAction
             action="_delete"
             routingForm={form}
