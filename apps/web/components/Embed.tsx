@@ -55,11 +55,13 @@ const goto = (router: NextRouter, searchParams: Record<string, string>) => {
   });
 };
 
-const removeQueryParams = (router: NextRouter, queryParams: string[]) => {
-  queryParams.forEach((param) => {
-    delete router.query[param];
+const removeQueryParams = (router: NextRouter, searchParams: string[]) => {
+  const newQuery = new URLSearchParams(router.asPath.split("?")[1]);
+  searchParams.forEach((param) => {
+    newQuery.delete(param);
   });
-  router.push(`${router.asPath.split("?")[0]}?${router.query.toString()}`);
+
+  router.push(`${router.asPath.split("?")[0]}?${newQuery.toString()}`);
 };
 
 /**
