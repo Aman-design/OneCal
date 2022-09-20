@@ -1049,7 +1049,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                 className={classNames(
                   router.query.embedTabName === tab.href.split("=")[1] ? "flex flex-grow flex-col" : "hidden"
                 )}>
-                <div className="flex h-[55vh] flex-grow flex-col">
+                <div className="flex h-[80rem] flex-grow flex-col">
                   {tab.type === "code" ? (
                     <tab.Component
                       embedType={embedType}
