@@ -62,7 +62,7 @@ if (embedType! === "inline") {
   const button = document.createElement("button");
   button.setAttribute("data-cal-link", calLink!);
   button.innerHTML = "I am a button that exists on your website";
-  document.body.appendChild(button);
+  document.body.prepend(button);
 }
 
 previewWindow.addEventListener("message", (e) => {
