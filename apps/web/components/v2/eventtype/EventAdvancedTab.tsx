@@ -37,12 +37,10 @@ export const EventAdvancedTab = ({ eventType, team }: Pick<EventTypeSetupInfered
   const connectedCalendarsQuery = trpc.useQuery(["viewer.connectedCalendars"]);
   const formMethods = useFormContext<FormValues>();
   const { t } = useLocale();
-  const utils = trpc.useContext();
   const [showEventNameTip, setShowEventNameTip] = useState(false);
   const [hashedLinkVisible, setHashedLinkVisible] = useState(!!eventType.hashedLink);
   const [hashedUrl, setHashedUrl] = useState(eventType.hashedLink?.link);
-  const [seatsInputVisible, setSeatsInputVisible] = useState(!!eventType.seatsPerTimeSlot);
-  const [seatsPerTimeSlot, setSeatsPerTimeSlot] = useState(eventType.seatsPerTimeSlot || 2);
+  const [seatsEnabled, setSeatsEnabled] = useState(false);
   const [customInputs, setCustomInputs] = useState<EventTypeCustomInput[]>(
     eventType.customInputs.sort((a, b) => a.id - b.id) || []
   );
@@ -51,7 +49,10 @@ export const EventAdvancedTab = ({ eventType, team }: Pick<EventTypeSetupInfered
   const placeholderHashedLink = `${CAL_URL}/d/${hashedUrl}/${eventType.slug}`;
 
   const animationRef = useRef(null);
-  const seatsEnabled = !!eventType.seatsPerTimeSlot;
+
+  useEffect(() => {
+    setSeatsEnabled(!!eventType.seatsPerTimeSlot);
+  }, [eventType.seatsPerTimeSlot]);
 
   useEffect(() => {
     animationRef.current && autoAnimate(animationRef.current);
@@ -296,46 +297,38 @@ export const EventAdvancedTab = ({ eventType, team }: Pick<EventTypeSetupInfered
         )}
       />
       <hr />
-      <Controller
-        name="seatsPerTimeSlot"
-        control={formMethods.control}
-        defaultValue={seatsPerTimeSlot}
-        render={({ field: { value, onChange } }) => (
-          <>
-            <div className="flex space-x-3">
-              <Switch
-                name="seatsPerTimeSlot"
-                checked={seatsInputVisible}
-                onCheckedChange={(e) => {
-                  setSeatsInputVisible(e);
-                  formMethods.setValue("seatsPerTimeSlot", seatsPerTimeSlot);
-                  onChange(e ? seatsPerTimeSlot : null);
-                }}
-                fitToHeight={true}
-              />
-              <div className="flex flex-col">
-                <Label className="text-sm font-semibold leading-none text-black">{t("offer_seats")}</Label>
-                <p className="-mt-2 text-sm leading-normal text-gray-600">{t("offer_seats_description")}</p>
-              </div>
-            </div>
-            {seatsInputVisible && (
-              <div className="">
-                <TextField
-                  required
-                  name="seatsPerTimeSlot"
-                  label={t("number_of_seats")}
-                  type="number"
-                  defaultValue={seatsPerTimeSlot || 2}
-                  addOnSuffix={<>{t("seats")}</>}
-                  onChange={(e) => {
-                    formMethods.setValue("seatsPerTimeSlot", Number(e.target.value));
-                  }}
-                />
-              </div>
-            )}
-          </>
-        )}
-      />
+      <div className="flex space-x-3">
+        <Switch
+          name="seatsPerTimeSlot"
+          checked={seatsEnabled}
+          onCheckedChange={(e) => {
+            setSeatsEnabled(e);
+            console.log(e ? formMethods.getValues("seatsPerTimeSlot") || 2 : null);
+            formMethods.setValue(
+              "seatsPerTimeSlot",
+              e ? formMethods.getValues("seatsPerTimeSlot") || 2 : null
+            );
+          }}
+          fitToHeight={true}
+        />
+        <div className="flex flex-col">
+          <Label className="text-sm font-semibold leading-none text-black">{t("offer_seats")}</Label>
+          <p className="-mt-2 text-sm leading-normal text-gray-600">{t("offer_seats_description")}</p>
+        </div>
+      </div>
+      {seatsEnabled && (
+        <div className="">
+          <TextField
+            {...formMethods.register("seatsPerTimeSlot", {
+              required: true,
+              setValueAs: (value: string) => (value === null ? null : +value),
+            })}
+            label={t("number_of_seats")}
+            type="number"
+            addOnSuffix={<>{t("seats")}</>}
+          />
+        </div>
+      )}
       {showEventNameTip && (
         <Dialog open={showEventNameTip} onOpenChange={setShowEventNameTip}>
           <DialogContent
