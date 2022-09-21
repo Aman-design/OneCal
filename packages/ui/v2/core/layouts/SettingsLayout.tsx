@@ -1,6 +1,7 @@
 import { MembershipRole, UserPermissionRole } from "@prisma/client";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import React, { ComponentProps, useEffect, useState } from "react";
 
 import { classNames } from "@calcom/lib";
@@ -96,12 +97,18 @@ const useTabs = () => {
   });
 };
 
-const SettingsSidebarContainer = ({ className = "" }) => {
+const SettingsSidebarContainer = ({
+  className = "",
+  closeContainer,
+}: {
+  className?: string;
+  // closeContainer: () => void;
+}) => {
   const { t } = useLocale();
+  const router = useRouter();
   const tabsWithPermissions = useTabs();
   const [teamMenuState, setTeamMenuState] =
     useState<{ teamId: number | undefined; teamMenuOpen: boolean }[]>();
-  const [isLoading, setIsLoading] = useState(true);
 
   const { data: teams } = trpc.useQuery(["viewer.teams.list"]);
 
@@ -111,6 +118,12 @@ const SettingsSidebarContainer = ({ className = "" }) => {
       setTeamMenuState(teamStates);
     }
   }, [teams]);
+
+  useEffect(() => {
+    if (router.isReady) {
+      closeContainer(false);
+    }
+  }, [router.isReady]);
 
   return (
     <nav
@@ -144,6 +157,7 @@ const SettingsSidebarContainer = ({ className = "" }) => {
                     name={t(child.name)}
                     href={child.href || "/"}
                     textClassNames="px-3 text-gray-900 font-medium text-sm"
+                    onClick={closeContainer}
                     disableChevron
                   />
                 ))}
@@ -310,7 +324,7 @@ export default function SettingsLayout({
             "absolute inset-y-0 z-50 m-0 h-screen transform overflow-y-scroll border-gray-100 bg-gray-50 transition duration-200 ease-in-out",
             sideContainerOpen ? "translate-x-0" : "-translate-x-full"
           )}>
-          <SettingsSidebarContainer />
+          <SettingsSidebarContainer closeContainer={setSideContainerOpen} />
         </div>
       }
       TopNavContainer={

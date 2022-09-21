@@ -20,6 +20,7 @@ export type VerticalTabItemProps = {
   disableChevron?: boolean;
   href: string;
   linkProps?: Omit<ComponentProps<typeof Link>, "href">;
+  onClick?: () => void;
 };
 
 const VerticalTabItem = function ({
