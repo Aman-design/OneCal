@@ -200,8 +200,12 @@ export default function InstalledApps({ category }: InferGetStaticPropsType<type
   );
 }
 
-// Server side rendering
+// // Server side rendering
 export async function getServerSideProps(ctx: AppGetServerSidePropsContext) {
+  const params = querySchema.safeParse(ctx.params);
+
+  if (!params.success) return { notFound: true };
+
   // get return-to cookie and redirect if needed
   const { cookies } = ctx.req;
   if (cookies && cookies["return-to"]) {
@@ -217,28 +221,8 @@ export async function getServerSideProps(ctx: AppGetServerSidePropsContext) {
     }
   }
   return {
-    props: {},
-  };
-}
-
-export const getStaticProps: GetStaticProps = (ctx) => {
-  const params = querySchema.safeParse(ctx.params);
-
-  if (!params.success) return { notFound: true };
-
-  return {
     props: {
       category: params.data.category,
     },
   };
-};
-
-export const getStaticPaths: GetStaticPaths = () => {
-  return {
-    paths: Object.values(InstalledAppVariants).map((category) => ({
-      params: { category },
-      locale: "en",
-    })),
-    fallback: "blocking",
-  };
-};
+}
