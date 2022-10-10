@@ -15,6 +15,7 @@ const querySchema = z.object({
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
   const ssr = await ssrInit(context);
+  const isEmbed = typeof context.query.embed === "string";
 
   const { uid } = querySchema.parse(context.query);
   const rawPayment = await prisma.payment.findFirst({
@@ -106,6 +107,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
       user,
       eventType,
       booking,
+      isEmbed,
       trpcState: ssr.dehydrate(),
       payment,
       profile,

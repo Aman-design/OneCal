@@ -57,7 +57,7 @@ export default function Type(props: AvailabilityPageProps) {
 Type.isThemeSupported = true;
 
 async function getUserPageProps(context: GetStaticPropsContext) {
-  const { type: slug, user: username } = paramsSchema.parse(context.params);
+  const { type, user: username } = paramsSchema.parse(context.params);
   const { ssgInit } = await import("@server/lib/ssg");
   const ssg = await ssgInit(context);
   const user = await prisma.user.findUnique({
@@ -92,7 +92,9 @@ async function getUserPageProps(context: GetStaticPropsContext) {
   });
 
   if (!user) return { notFound: true };
-
+  const slug = type[0];
+  const isEmbed = type[1] === "embed";
+  //TODO: Reject any other type[1] value as of now.
   const eventTypes = await prisma.eventType.findMany({
     where: {
       slug,
@@ -161,10 +163,11 @@ async function getUserPageProps(context: GetStaticPropsContext) {
   });
 
   const profile = eventType.users[0] || user;
-
+  console.log("isEmbed", isEmbed);
   return {
     props: {
       eventType: eventTypeObject,
+      isEmbed,
       profile: {
         theme: user.theme,
         name: user.name,
@@ -282,10 +285,12 @@ async function getDynamicGroupPageProps(context: GetStaticPropsContext) {
   };
 }
 
-const paramsSchema = z.object({ type: z.string(), user: z.string() });
+const paramsSchema = z.object({ type: z.array(z.string()), user: z.string() });
 
 export const getStaticProps = async (context: GetStaticPropsContext) => {
+  console.log("Params,", context.params);
   const { user: userParam } = paramsSchema.parse(context.params);
+  console.log("User Param", userParam);
   // dynamic groups are not generated at build time, but otherwise are probably cached until infinity.
   const isDynamicGroup = userParam.includes("+");
   if (isDynamicGroup) {

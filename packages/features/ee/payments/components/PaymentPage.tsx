@@ -24,7 +24,7 @@ const PaymentPage: FC<PaymentPageProps> = (props) => {
   const [date, setDate] = useState(dayjs.utc(props.booking.startTime));
   const [timezone, setTimezone] = useState<string | null>(null);
   useTheme(props.profile.theme);
-  const isEmbed = useIsEmbed();
+  const isEmbed = useIsEmbed(props.isEmbed);
   useEffect(() => {
     let embedIframeWidth = 0;
     const _timezone = localStorage.getItem("timeOption.preferredTimeZone") || dayjs.tz.guess();

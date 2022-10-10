@@ -52,6 +52,13 @@ const middleware: NextMiddleware = async (req) => {
     return NextResponse.rewrite(url);
   }
 
+  if (url.pathname.endsWith("/embed")) {
+    if (typeof url.searchParams.get("embed") !== "string") {
+      url.searchParams.set("embed", "");
+      return NextResponse.redirect(url);
+    }
+  }
+
   /** Display available V2 pages */
   if (
     !V2_BLACKLIST.some((p) => url.pathname.startsWith(p)) &&

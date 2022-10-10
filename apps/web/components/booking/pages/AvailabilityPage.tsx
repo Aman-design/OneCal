@@ -42,7 +42,7 @@ import EventTypeDescriptionSafeHTML from "@components/eventtype/EventTypeDescrip
 import { HeadSeo } from "@components/seo/head-seo";
 import PoweredByCal from "@components/ui/PoweredByCal";
 
-import type { AvailabilityPageProps } from "../../../pages/[user]/[type]";
+//import type { AvailabilityPageProps } from "../../../pages/[user]/[...type]";
 import type { DynamicAvailabilityPageProps } from "../../../pages/d/[link]/[slug]";
 import type { AvailabilityTeamPageProps } from "../../../pages/team/[slug]/[type]";
 import { AvailableEventLocations } from "../AvailableEventLocations";
@@ -301,11 +301,11 @@ const timeFormatTotimeFormatString = (timeFormat?: number | null) => {
   return timeFormat === 24 ? "HH:mm" : "h:mma";
 };
 
-const AvailabilityPage = ({ profile, eventType }: Props) => {
+const AvailabilityPage = ({ profile, eventType, ...restProps }: Props) => {
   const { data: user } = trpc.useQuery(["viewer.me"]);
   const timeFormatFromProfile = timeFormatTotimeFormatString(user?.timeFormat);
   const router = useRouter();
-  const isEmbed = useIsEmbed();
+  const isEmbed = useIsEmbed(restProps.isEmbed);
   const query = dateQuerySchema.parse(router.query);
   const { rescheduleUid } = query;
   useTheme(profile.theme);

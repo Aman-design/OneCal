@@ -217,11 +217,10 @@ function getEmbedType() {
   }
 }
 
-export const useIsEmbed = () => {
+export const useIsEmbed = (isEmbed: boolean) => {
   // We can't simply return isEmbed() from this method.
   // isEmbed() returns different values on server and browser, which messes up the hydration.
   // TODO: We can avoid using document.URL and instead use Router.
-  const [isEmbed, setIsEmbed] = useState<boolean | null>(null);
   useEffect(() => {
     const namespace = getNamespace();
     const _isValidNamespace = isValidNamespace(namespace);
@@ -230,7 +229,6 @@ export const useIsEmbed = () => {
         "Looks like you have iframed cal.com but not using Embed Snippet. Directly using an iframe isn't recommended."
       );
     }
-    setIsEmbed(window.isEmbed());
   }, []);
   return isEmbed;
 };

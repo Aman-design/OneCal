@@ -67,6 +67,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const usernameList = getUsernameList(asStringOrThrow(context.query.user as string));
   const eventTypeSlug = context.query.slug as string;
   const recurringEventCountQuery = asStringOrNull(context.query.count);
+  const isEmbed = typeof context.query.embed === "string";
   const users = await prisma.user.findMany({
     where: {
       username: {
@@ -188,6 +189,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
+      isEmbed,
       away: user.away,
       profile,
       eventType: eventTypeObject,
