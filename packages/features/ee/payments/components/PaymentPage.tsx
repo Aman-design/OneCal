@@ -64,9 +64,6 @@ const PaymentPage: FC<PaymentPageProps> = (props) => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 my-4 transition-opacity sm:my-0" aria-hidden="true">
-              <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
-                &#8203;
-              </span>
               <div
                 className={classNames(
                   "main inline-block transform overflow-hidden rounded-lg border border-neutral-200 bg-white px-8 pt-5 pb-4 text-left align-bottom transition-all dark:border-neutral-700 dark:bg-gray-800  sm:w-full sm:max-w-lg sm:py-6 sm:align-middle",
