@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { Booking, BookingStatus, EventType, Prisma, UserPlan, Webhook } from "@prisma/client";
+import { Booking, BookingStatus, EventType, Prisma, User, UserPlan, Webhook } from "@prisma/client";
 
 import { CalendarEvent, Person, VideoCallData } from "@calcom/types/Calendar";
 
@@ -58,7 +58,11 @@ export const buildBooking = (booking?: Partial<Booking>): Booking => {
   };
 };
 
-export const buildEventType = (eventType?: Partial<EventType>): EventType => {
+export const buildEventType = (
+  eventType?: Partial<EventType> & {
+    users?: User[];
+  }
+): EventType => {
   return {
     id: faker.datatype.number(),
     title: faker.lorem.sentence(),
@@ -171,7 +175,7 @@ export const buildUser = <T extends Partial<UserPayload>>(user?: T): UserPayload
     email: faker.internet.email(),
     timeZone: faker.address.timeZone(),
     username: faker.internet.userName(),
-    id: 0,
+    id: 4, // can't be 0, as it evaluates as falsy
     allowDynamicBooking: true,
     availability: [],
     avatar: "",

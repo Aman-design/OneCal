@@ -56,7 +56,7 @@ const config: Config = {
       testMatch: ["**/test/lib/**/*.(spec|test).(ts|tsx|js)"],
       setupFilesAfterEnv: ["<rootDir>/tests/config/singleton.ts"],
       transform: {
-        "^.+\\.ts?$": "ts-jest",
+        "^.+\\.ts(x)?$": "ts-jest",
       },
       globals: {
         "ts-jest": {
