@@ -6,7 +6,7 @@
   "imageSrc": "/api/app-store/slack/icon.svg",
   "logo": "/api/app-store/slack/icon.svg",
   "url": "https://cal.com/apps/slack",
-  "variant": "messaging",
+  "variant": "conferencing",
   "categories": ["messaging"],
   "publisher": "Cal.com",
   "email": "help@cal.com",

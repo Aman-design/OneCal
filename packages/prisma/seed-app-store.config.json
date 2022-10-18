@@ -85,7 +85,7 @@
     "type": "fathom_analytics"
   },
   {
-    "dirName": "slackmessaging",
+    "dirName": "slack",
     "categories": ["messaging"],
     "slug": "slack",
     "type": "slack_messaging"

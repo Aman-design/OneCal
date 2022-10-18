@@ -15,10 +15,9 @@ import { Button, EmptyScreen } from "@calcom/ui/v2";
 type EventType = Pick<EventTypeSetupInfered, "eventType">["eventType"] &
   EventTypeAppCardComponentProps["eventType"];
 
-// @Hariom maybe we could come up with a nicer way to handle this
+// Here incase we have any old apps that dont support the new app format.
 const trueSlugMap: Record<string, string> = {
   stripe: "stripepayment",
-  slack: "slackmessaging",
 };
 
 function AppCardWrapper({
