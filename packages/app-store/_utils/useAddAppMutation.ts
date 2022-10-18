@@ -47,7 +47,6 @@ function useAddAppMutation(_type: App["type"] | null, options?: Parameters<typeo
         window.location.href = json.url;
       }
     } else {
-      alert(json.url);
       window.location.href = json.url;
     }
   }, options);
