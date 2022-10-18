@@ -42,7 +42,12 @@ function useAddAppMutation(_type: App["type"] | null, options?: Parameters<typeo
     // Skip redirection only if it is an OmniInstall and redirect URL isn't of some other origin
     // This allows installation of apps like Stripe to still redirect to their authentication pages.
     // TODO: For Omni installation to authenticate and come back to the page where installation was initiated, some changes need to be done in all apps' add callbacks
-    if (!(isOmniInstall && !json.url.startsWith(window.location.origin))) {
+    if (isOmniInstall) {
+      if (!json.url.startsWith(window.location.origin)) {
+        window.location.href = json.url;
+      }
+    } else {
+      alert(json.url);
       window.location.href = json.url;
     }
   }, options);

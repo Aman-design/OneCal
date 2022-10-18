@@ -45,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     data: {
       credentials: {
         create: {
-          type: "slack_app",
+          type: "slack_messaging",
           key: responseBody,
           appId: "slack",
         },

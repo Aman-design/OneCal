@@ -1,6 +1,6 @@
 export const WhereCredsEqualsId = (userId: string) => ({
   where: {
-    type: "slack_app",
+    type: "slack_messaging",
     key: {
       path: ["authed_user", "id"],
       equals: userId,

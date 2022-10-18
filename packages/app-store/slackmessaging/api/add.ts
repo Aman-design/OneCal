@@ -30,8 +30,7 @@ async function handler(req: NextApiRequest) {
   };
   const query = stringify(params);
   const url = `https://slack.com/oauth/v2/authorize?${query}&user_`;
-  // const url =
-  //   "https://slack.com/oauth/v2/authorize?client_id=3194129032064.3178385871204&scope=chat:write,commands&user_scope=";
+
   return { url };
 }
 
