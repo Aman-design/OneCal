@@ -36,6 +36,6 @@ export const EventTypeAddonMap = {
   giphy: dynamic(() => import("./giphy/extensions/EventTypeAppCard")),
   qr_code: dynamic(() => import("./qr_code/extensions/EventTypeAppCard")),
   rainbow: dynamic(() => import("./rainbow/extensions/EventTypeAppCard")),
-  slackmessaging: dynamic(() => import("./slackmessaging/extensions/EventTypeAppCard")),
+  slack: dynamic(() => import("./slack/extensions/EventTypeAppCard")),
   stripepayment: dynamic(() => import("./stripepayment/extensions/EventTypeAppCard")),
 };

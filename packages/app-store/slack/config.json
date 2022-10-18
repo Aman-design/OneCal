@@ -1,0 +1,16 @@
+{
+  "/*": "Don't modify slug - If required, do it using cli edit command",
+  "name": "slack",
+  "slug": "slack",
+  "type": "slack_messaging",
+  "imageSrc": "/api/app-store/slack/icon.svg",
+  "logo": "/api/app-store/slack/icon.svg",
+  "url": "https://cal.com/apps/slack",
+  "variant": "messaging",
+  "categories": ["messaging"],
+  "publisher": "Cal.com",
+  "email": "help@cal.com",
+  "description": "A business communication platform that includes persistent chat rooms (channels), private groups and direct messaging.",
+  "extendsFeature": "EventType",
+  "__createdUsingCli": true
+}
