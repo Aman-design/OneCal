@@ -15,6 +15,12 @@ import { Button, EmptyScreen } from "@calcom/ui/v2";
 type EventType = Pick<EventTypeSetupInfered, "eventType">["eventType"] &
   EventTypeAppCardComponentProps["eventType"];
 
+// @Hariom maybe we could come up with a nicer way to handle this
+const trueSlugMap: Record<string, string> = {
+  stripe: "stripepayment",
+  slack: "slackmessaging",
+};
+
 function AppCardWrapper({
   app,
   eventType,
@@ -26,7 +32,7 @@ function AppCardWrapper({
   getAppData: GetAppData;
   setAppData: SetAppData;
 }) {
-  const dirName = app.slug === "stripe" ? "stripepayment" : app.slug;
+  const dirName = trueSlugMap[app.slug] ?? app.slug;
   const Component = EventTypeAddonMap[dirName as keyof typeof EventTypeAddonMap];
 
   if (!Component) {

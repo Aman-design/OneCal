@@ -14,11 +14,11 @@ export const metadata = {
   slug: "slack",
   title: "Slack App",
   trending: true,
-  // DB has type slack_app. It is an inconsistency
   type: "slack_messaging",
   url: "https://slack.com/",
   variant: "conferencing",
   verified: true,
+  extendsFeature: "EventType",
   email: "help@cal.com",
 } as AppMeta;
 
