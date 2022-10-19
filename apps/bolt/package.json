@@ -1,0 +1,21 @@
+{
+  "name": "@calcom/bolt",
+  "version": "1.0.0",
+  "description": "Bolt getting started app in TypeScript",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "ts-node --transpile-only src/app.ts --watch",
+    "build": "ts-node --transpile-only src/app.ts --watch",
+    "start": "npm run build && node dist/app.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^3.3.0",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.35",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  }
+}
