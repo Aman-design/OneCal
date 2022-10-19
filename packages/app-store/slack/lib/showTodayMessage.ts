@@ -11,6 +11,7 @@ import { NoUserMessage, TodayMessage } from "./views";
 export default async function showCreateEventMessage(req: NextApiRequest, res: NextApiResponse) {
   const body = req.body;
   await slackVerify(req, res);
+  // we cant throw here because we need to show the no user error message
   const foundUser = await prisma.credential.findFirst({
     ...WhereCredsEqualsId(body.user_id),
     include: {

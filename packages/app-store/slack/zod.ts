@@ -4,6 +4,7 @@ import { eventTypeAppCardZod } from "../eventTypeAppCardZod";
 
 export const appDataSchema = eventTypeAppCardZod.merge(
   z.object({
-    isSunrise: z.boolean(),
+    getNotifcations: z.boolean().optional(),
+    bookableFromSlack: z.boolean().optional(),
   })
 );
