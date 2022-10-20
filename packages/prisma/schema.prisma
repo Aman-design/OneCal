@@ -616,3 +616,11 @@ enum WorkflowMethods {
   EMAIL
   SMS
 }
+
+model SlackInstallations {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  key       String   @unique
+  data      Json
+}

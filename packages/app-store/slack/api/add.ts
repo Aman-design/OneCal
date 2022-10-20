@@ -7,7 +7,7 @@ import prisma from "@calcom/prisma";
 
 import { getSlackAppKeys } from "../lib/utils";
 
-const scopes = ["commands", "users:read", "users:read.email", "chat:write", "chat:write.public"];
+const scopes = ["commands", "channel:history", "groups:history", "im:history", "mpim:history"];
 
 async function handler(req: NextApiRequest) {
   if (!req.session?.user?.id) {

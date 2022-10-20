@@ -38,6 +38,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const result = await fetch(url);
   const responseBody = await result.json();
 
+  // We have moved to using bot access tokens so lets not store users API key in db if we don't have to.
+  delete responseBody.access_token;
+
   await prisma.user.update({
     where: {
       id: req.session.user.id,
