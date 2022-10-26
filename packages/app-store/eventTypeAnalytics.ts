@@ -39,4 +39,10 @@ export const trackingApps: Partial<
       },
     ],
   },
+  plausible: {
+    // todo @hariom figure out how to do this:
+    // <script defer data-domain="cal.com" src="https://plausible.io/js/plausible.js"></script>
+
+    scripts: `<script defer data-domain={TRACKING_ID} src="https://plausible.io/js/plausible.js"></script>`,
+  },
 };

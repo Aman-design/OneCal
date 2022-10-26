@@ -1,0 +1,16 @@
+{
+  "/*": "Don't modify slug - If required, do it using cli edit command",
+  "name": "Plausible.io",
+  "slug": "plausible_io",
+  "type": "plausible_io_analytics",
+  "imageSrc": "/api/app-store/plausible_io/icon.svg",
+  "logo": "/api/app-store/plausible_io/icon.svg",
+  "url": "https://cal.com/apps/plausible_io",
+  "variant": "analytics",
+  "categories": ["analytics"],
+  "publisher": "Cal.com, Inc.",
+  "email": "support@cal.com",
+  "description": "Simple and privacy-friendly Google Analytics alternative\r. ",
+  "extendsFeature": "EventType",
+  "__createdUsingCli": true
+}

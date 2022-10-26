@@ -95,5 +95,11 @@
     "categories": ["automation"],
     "slug": "pipedream",
     "type": "pipedream_automation"
+  },
+  {
+    "dirName": "plausible_io",
+    "categories": ["analytics"],
+    "slug": "plausible_io",
+    "type": "plausible_io_analytics"
   }
 ]
