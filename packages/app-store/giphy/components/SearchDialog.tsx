@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 
 import classNames from "@calcom/lib/classNames";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
+import type { SVGComponent } from "@calcom/types/SVGComponent";
 import { Alert, Button, Dialog, DialogClose, DialogContent, DialogFooter } from "@calcom/ui";
 
 interface ISearchDialog {
@@ -83,7 +84,7 @@ export const SearchDialog = (props: ISearchDialog) => {
     return null;
   };
 
-  const renderTab = (Icon: any, text: string, mode: Mode) => (
+  const renderTab = (Icon: SVGComponent, text: string, mode: Mode) => (
     <div
       className={classNames(
         "flex cursor-pointer items-center border-b-2 p-2 text-sm",
