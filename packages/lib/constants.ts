@@ -12,6 +12,7 @@ export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://cal.c
 // As website isn't setup for preview environments, use the webapp url instead
 export const CAL_URL = new URL(WEBAPP_URL).hostname.endsWith(".vercel.app") ? WEBAPP_URL : WEBSITE_URL;
 
+export const API_URL = process.env.API_URL || "http://localhost:3002";
 export const CONSOLE_URL =
   new URL(WEBAPP_URL).hostname.endsWith(".cal.dev") || process.env.NODE_ENV !== "production"
     ? `https://console.cal.dev`
