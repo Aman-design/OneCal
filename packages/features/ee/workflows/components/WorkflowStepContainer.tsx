@@ -39,6 +39,7 @@ import {
   getWorkflowTemplateOptions,
   getWorkflowTriggerOptions,
 } from "../lib/getOptions";
+import { isEmailAction, isSMSAction } from "../lib/helperFunctions";
 import { translateVariablesToEnglish } from "../lib/variableTranslations";
 import type { FormValues } from "../pages/workflow";
 import Editor from "./TextEditor/Editor";
@@ -61,11 +62,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
     step?.action === WorkflowActions.SMS_NUMBER ? true : false
   );
 
-  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(
-    step?.action === WorkflowActions.SMS_NUMBER || step?.action === WorkflowActions.SMS_ATTENDEE
-      ? true
-      : false
-  );
+  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(isSMSAction(step?.action));
 
   const [isEmailAddressNeeded, setIsEmailAddressNeeded] = useState(
     step?.action === WorkflowActions.EMAIL_ADDRESS ? true : false
@@ -75,13 +72,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
     step?.template === WorkflowTemplates.CUSTOM ? true : false
   );
 
-  const [isEmailSubjectNeeded, setIsEmailSubjectNeeded] = useState(
-    step?.action === WorkflowActions.EMAIL_ATTENDEE ||
-      step?.action === WorkflowActions.EMAIL_HOST ||
-      step?.action === WorkflowActions.EMAIL_ADDRESS
-      ? true
-      : false
-  );
+  const [isEmailSubjectNeeded, setIsEmailSubjectNeeded] = useState(isEmailAction(step?.action));
 
   const [showTimeSection, setShowTimeSection] = useState(
     form.getValues("trigger") === WorkflowTriggerEvents.BEFORE_EVENT ||
@@ -293,14 +284,9 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                         onChange={(val) => {
                           if (val) {
                             const oldValue = form.getValues(`steps.${step.stepNumber - 1}.action`);
-                            const wasSMSAction =
-                              oldValue === WorkflowActions.SMS_ATTENDEE ||
-                              oldValue === WorkflowActions.SMS_NUMBER;
-                            const isSMSAction =
-                              val.value === WorkflowActions.SMS_ATTENDEE ||
-                              val.value === WorkflowActions.SMS_NUMBER;
+                            const wasSMSAction = isSMSAction(oldValue);
 
-                            if (isSMSAction) {
+                            if (isSMSAction(val.value)) {
                               setIsSenderIdNeeded(true);
                               setIsEmailAddressNeeded(false);
                               setIsPhoneNumberNeeded(val.value === WorkflowActions.SMS_NUMBER);
@@ -320,11 +306,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
 
                             form.unregister(`steps.${step.stepNumber - 1}.sendTo`);
                             form.clearErrors(`steps.${step.stepNumber - 1}.sendTo`);
-                            if (
-                              val.value === WorkflowActions.EMAIL_ATTENDEE ||
-                              val.value === WorkflowActions.EMAIL_HOST ||
-                              val.value === WorkflowActions.EMAIL_ADDRESS
-                            ) {
+                            if (isEmailAction(val.value)) {
                               setIsEmailSubjectNeeded(true);
                             } else {
                               setIsEmailSubjectNeeded(false);
@@ -460,8 +442,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                     </div>
                   )}
 
-                  {step.action !== WorkflowActions.SMS_ATTENDEE &&
-                  step.action !== WorkflowActions.SMS_NUMBER ? (
+                  {!isSMSAction(step.action) ? (
                     <>
                       <div className="mb-2 flex items-center pb-[1.5px]">
                         <Label className="mb-0 flex-none ">

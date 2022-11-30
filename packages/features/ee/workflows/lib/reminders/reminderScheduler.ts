@@ -8,6 +8,7 @@ import {
 
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
+import { isEmailAction, isSMSAction } from "../helperFunctions";
 import { scheduleEmailReminder } from "./emailReminderManager";
 import { scheduleSMSReminder } from "./smsReminderManager";
 
@@ -37,7 +38,7 @@ export const scheduleWorkflowReminders = async (
         workflow.trigger === WorkflowTriggerEvents.AFTER_EVENT
       ) {
         workflow.steps.forEach(async (step) => {
-          if (step.action === WorkflowActions.SMS_ATTENDEE || step.action === WorkflowActions.SMS_NUMBER) {
+          if (isSMSAction(step.action)) {
             const sendTo = step.action === WorkflowActions.SMS_ATTENDEE ? smsReminderNumber : step.sendTo;
             await scheduleSMSReminder(
               evt,
@@ -53,11 +54,7 @@ export const scheduleWorkflowReminders = async (
               step.template,
               step.sender || "Cal"
             );
-          } else if (
-            step.action === WorkflowActions.EMAIL_ATTENDEE ||
-            step.action === WorkflowActions.EMAIL_HOST ||
-            step.action === WorkflowActions.EMAIL_ADDRESS
-          ) {
+          } else if (isEmailAction(step.action)) {
             let sendTo = "";
 
             switch (step.action) {
@@ -106,7 +103,7 @@ export const sendCancelledReminders = async (
       .forEach((workflowRef) => {
         const workflow = workflowRef.workflow;
         workflow.steps.forEach(async (step) => {
-          if (step.action === WorkflowActions.SMS_ATTENDEE || step.action === WorkflowActions.SMS_NUMBER) {
+          if (isSMSAction(step.action)) {
             const sendTo = step.action === WorkflowActions.SMS_ATTENDEE ? smsReminderNumber : step.sendTo;
             await scheduleSMSReminder(
               evt,
@@ -122,11 +119,7 @@ export const sendCancelledReminders = async (
               step.template,
               step.sender || "Cal"
             );
-          } else if (
-            step.action === WorkflowActions.EMAIL_ATTENDEE ||
-            step.action === WorkflowActions.EMAIL_HOST ||
-            step.action === WorkflowActions.EMAIL_ADDRESS
-          ) {
+          } else if (isEmailAction(step.action)) {
             let sendTo = "";
 
             switch (step.action) {

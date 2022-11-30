@@ -1,4 +1,5 @@
 import { WorkflowActions, WorkflowStep } from "@prisma/client";
+import { isSMSAction } from "ee/workflows/lib/helperFunctions";
 
 import { classNames } from "@calcom/lib";
 import { Icon } from "@calcom/ui";
@@ -14,7 +15,7 @@ export function getActionIcon(steps: WorkflowStep[], className?: string): JSX.El
   }
 
   if (steps.length === 1) {
-    if (steps[0].action === WorkflowActions.SMS_ATTENDEE || steps[0].action === WorkflowActions.SMS_NUMBER) {
+    if (isSMSAction(steps[0].action)) {
       return (
         <Icon.FiSmartphone
           className={classNames(className ? className : "mr-1.5 inline h-3 w-3")}
@@ -41,10 +42,7 @@ export function getActionIcon(steps: WorkflowStep[], className?: string): JSX.El
             ? "SMS"
             : "EMAIL";
       } else if (messageType !== "MIX") {
-        const newMessageType =
-          step.action === WorkflowActions.SMS_ATTENDEE || step.action === WorkflowActions.SMS_NUMBER
-            ? "SMS"
-            : "EMAIL";
+        const newMessageType = isSMSAction(step.action) ? "SMS" : "EMAIL";
         if (newMessageType !== messageType) {
           messageType = "MIX";
         }

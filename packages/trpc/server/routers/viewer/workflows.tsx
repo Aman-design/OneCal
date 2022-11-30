@@ -17,6 +17,7 @@ import {
   WORKFLOW_ACTIONS,
   TIME_UNIT,
 } from "@calcom/features/ee/workflows/lib/constants";
+import { isEmailAction } from "@calcom/features/ee/workflows/lib/helperFunctions";
 import {
   deleteScheduledEmailReminder,
   scheduleEmailReminder,
@@ -424,11 +425,7 @@ export const workflowsRouter = router({
                   title: booking.title,
                   language: { locale: booking?.user?.locale || "" },
                 };
-                if (
-                  step.action === WorkflowActions.EMAIL_HOST ||
-                  step.action === WorkflowActions.EMAIL_ATTENDEE ||
-                  step.action === WorkflowActions.EMAIL_ADDRESS
-                ) {
+                if (isEmailAction(step.action)) {
                   let sendTo = "";
 
                   switch (step.action) {
@@ -602,11 +599,7 @@ export const workflowsRouter = router({
                 title: booking.title,
                 language: { locale: booking?.user?.locale || "" },
               };
-              if (
-                newStep.action === WorkflowActions.EMAIL_HOST ||
-                newStep.action === WorkflowActions.EMAIL_ATTENDEE ||
-                newStep.action === WorkflowActions.EMAIL_ADDRESS
-              ) {
+              if (isEmailAction(newStep.action)) {
                 let sendTo = "";
 
                 switch (newStep.action) {
@@ -715,11 +708,7 @@ export const workflowsRouter = router({
                   language: { locale: booking?.user?.locale || "" },
                 };
 
-                if (
-                  step.action === WorkflowActions.EMAIL_ATTENDEE ||
-                  step.action === WorkflowActions.EMAIL_HOST ||
-                  step.action === WorkflowActions.EMAIL_ADDRESS
-                ) {
+                if (isEmailAction(step.action)) {
                   let sendTo = "";
 
                   switch (step.action) {
@@ -870,11 +859,7 @@ export const workflowsRouter = router({
           };
         }
 
-        if (
-          action === WorkflowActions.EMAIL_ATTENDEE ||
-          action === WorkflowActions.EMAIL_HOST ||
-          action === WorkflowActions.EMAIL_ADDRESS
-        ) {
+        if (isEmailAction(action)) {
           scheduleEmailReminder(
             evt,
             WorkflowTriggerEvents.NEW_EVENT,

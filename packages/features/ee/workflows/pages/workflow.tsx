@@ -24,6 +24,7 @@ import { Alert, Button, Form, Shell, showToast } from "@calcom/ui";
 import LicenseRequired from "../../common/components/v2/LicenseRequired";
 import SkeletonLoader from "../components/SkeletonLoaderEdit";
 import WorkflowDetailsPage from "../components/WorkflowDetailsPage";
+import { isSMSAction } from "../lib/helperFunctions";
 import { getTranslatedText, translateVariablesToEnglish } from "../lib/variableTranslations";
 
 export type FormValues = {
@@ -177,13 +178,12 @@ function WorkflowPage() {
         let isEmpty = false;
 
         values.steps.forEach((step) => {
-          const isSMSAction =
-            step.action === WorkflowActions.SMS_ATTENDEE || step.action === WorkflowActions.SMS_NUMBER;
-
           const strippedHtml = step.reminderBody?.replace(/<[^>]+>/g, "") || "";
 
           const isBodyEmpty =
-            step.template === WorkflowTemplates.CUSTOM && !isSMSAction && strippedHtml.length <= 1;
+            step.template === WorkflowTemplates.CUSTOM &&
+            !isSMSAction(step.action) &&
+            strippedHtml.length <= 1;
 
           if (isBodyEmpty) {
             form.setError(`steps.${step.stepNumber - 1}.reminderBody`, {
