@@ -1384,5 +1384,8 @@
   "test_preview_description": "Test your routing form without submitting any data",
   "test_routing": "Test Routing",
   "booking_limit_reached":"Booking Limit for this event type has been reached",
-  "fill_this_field": "Please fill in this field"
+  "fill_this_field": "Please fill in this field",
+  "whatsapp_attendee_action": "send Whatsapp message to attendee",
+  "whatsapp_number_action": "send Whatsapp message to specific number"
+
 }
