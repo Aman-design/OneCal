@@ -70,22 +70,20 @@ const WorkflowListItem = (props: ItemProps) => {
   const sendTo: Set<string> = new Set();
 
   workflow.steps.forEach((step) => {
-    switch (step.action) {
-      case WorkflowActions.EMAIL_HOST:
-        sendTo.add(t("organizer_name_workflow"));
-        break;
-      case WorkflowActions.EMAIL_ATTENDEE:
-        sendTo.add(t("attendee_name_workflow"));
-        break;
-      case WorkflowActions.SMS_ATTENDEE:
-        sendTo.add(t("attendee_name_workflow"));
-        break;
-      case WorkflowActions.SMS_NUMBER:
-        sendTo.add(step.sendTo || "");
-        break;
-      case WorkflowActions.EMAIL_ADDRESS:
-        sendTo.add(step.sendTo || "");
-        break;
+    if (step.action === WorkflowActions.EMAIL_HOST) {
+      sendTo.add(t("organizer_name_workflow"));
+    } else if (
+      step.action === WorkflowActions.EMAIL_ATTENDEE ||
+      step.action === WorkflowActions.SMS_ATTENDEE ||
+      step.action === WorkflowActions.WHATSAPP_ATTENDEE
+    ) {
+      sendTo.add(t("attendee_name_workflow"));
+    } else if (
+      step.action === WorkflowActions.SMS_NUMBER ||
+      step.action === WorkflowActions.EMAIL_ADDRESS ||
+      step.action === WorkflowActions.WHATSAPP_NUMBER
+    ) {
+      sendTo.add(step.sendTo || "");
     }
   });
 
