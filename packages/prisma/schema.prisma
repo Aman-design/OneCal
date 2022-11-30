@@ -624,4 +624,5 @@ enum WorkflowTemplates {
 enum WorkflowMethods {
   EMAIL
   SMS
+  WHATSAPP
 }
