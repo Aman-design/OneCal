@@ -64,7 +64,9 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
       : false
   );
 
-  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(isSMSAction(step?.action));
+  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(
+    isSMSAction(step?.action) || isWhatsappAction(step?.action)
+  );
 
   const [isEmailAddressNeeded, setIsEmailAddressNeeded] = useState(
     step?.action === WorkflowActions.EMAIL_ADDRESS ? true : false
