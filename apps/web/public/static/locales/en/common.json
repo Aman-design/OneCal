@@ -1385,7 +1385,8 @@
   "test_routing": "Test Routing",
   "booking_limit_reached":"Booking Limit for this event type has been reached",
   "fill_this_field": "Please fill in this field",
-  "whatsapp_attendee_action": "send Whatsapp message to attendee",
-  "whatsapp_number_action": "send Whatsapp message to specific number"
+  "whatsapp_attendee_action": "send WhatsApp message to attendee",
+  "whatsapp_number_action": "send WhatsApp message to specific number",
+  "send_whatsapp_to_number": "Are you sure you want to send a WhatsApp message to {{number}}?"
 
 }

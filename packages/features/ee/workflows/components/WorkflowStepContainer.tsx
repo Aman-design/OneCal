@@ -39,7 +39,7 @@ import {
   getWorkflowTemplateOptions,
   getWorkflowTriggerOptions,
 } from "../lib/getOptions";
-import { isEmailAction, isSMSAction, isWhatsappAction } from "../lib/helperFunctions";
+import { isEmailAction, isSMSAction, isWhatsAppAction } from "../lib/helperFunctions";
 import { translateVariablesToEnglish } from "../lib/variableTranslations";
 import type { FormValues } from "../pages/workflow";
 import Editor from "./TextEditor/Editor";
@@ -64,9 +64,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
       : false
   );
 
-  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(
-    isSMSAction(step?.action) || isWhatsappAction(step?.action)
-  );
+  const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(isSMSAction(step?.action));
 
   const [isEmailAddressNeeded, setIsEmailAddressNeeded] = useState(
     step?.action === WorkflowActions.EMAIL_ADDRESS ? true : false
@@ -289,35 +287,28 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                           if (val) {
                             const oldValue = form.getValues(`steps.${step.stepNumber - 1}.action`);
                             const wasSMSAction = isSMSAction(oldValue);
+                            const wasWhatsAppActionAction = isWhatsAppAction(oldValue);
 
-                            if (isSMSAction(val.value) || isWhatsappAction(val.value)) {
-                              setIsSenderIdNeeded(true);
-                              setIsEmailAddressNeeded(false);
-                              setIsPhoneNumberNeeded(
-                                val.value === WorkflowActions.SMS_NUMBER ||
-                                  val.value === WorkflowActions.WHATSAPP_NUMBER
-                              );
+                            setIsEmailAddressNeeded(val.value === WorkflowActions.EMAIL_ADDRESS);
+                            setIsEmailSubjectNeeded(isEmailAction(val.value));
+                            setIsSenderIdNeeded(isSMSAction(val.value));
+                            setIsPhoneNumberNeeded(
+                              val.value === WorkflowActions.SMS_NUMBER ||
+                                val.value === WorkflowActions.WHATSAPP_NUMBER
+                            );
 
-                              if (!wasSMSAction) {
+                            if (isSMSAction(val.value) || isWhatsAppAction(val.value)) {
+                              if (!wasSMSAction && !wasWhatsAppActionAction) {
                                 form.setValue(`steps.${step.stepNumber - 1}.reminderBody`, "");
                               }
                             } else {
-                              setIsPhoneNumberNeeded(false);
-                              setIsSenderIdNeeded(false);
-                              setIsEmailAddressNeeded(val.value === WorkflowActions.EMAIL_ADDRESS);
-
-                              if (wasSMSAction) {
+                              if (wasSMSAction || wasWhatsAppActionAction) {
                                 form.setValue(`steps.${step.stepNumber - 1}.reminderBody`, "");
                               }
                             }
 
                             form.unregister(`steps.${step.stepNumber - 1}.sendTo`);
                             form.clearErrors(`steps.${step.stepNumber - 1}.sendTo`);
-                            if (isEmailAction(val.value)) {
-                              setIsEmailSubjectNeeded(true);
-                            } else {
-                              setIsEmailSubjectNeeded(false);
-                            }
                             form.setValue(`steps.${step.stepNumber - 1}.action`, val.value);
                           }
                         }}
@@ -371,7 +362,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
               {(form.getValues(`steps.${step.stepNumber - 1}.action`) === WorkflowActions.SMS_ATTENDEE ||
                 form.getValues(`steps.${step.stepNumber - 1}.action`) ===
                   WorkflowActions.WHATSAPP_ATTENDEE) && (
-                <div className="mt-2">
+                <div className="mt-4">
                   <Controller
                     name={`steps.${step.stepNumber - 1}.numberRequired`}
                     control={form.control}
@@ -451,7 +442,7 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                     </div>
                   )}
 
-                  {!isSMSAction(step.action) ? (
+                  {!isSMSAction(step.action) && !isWhatsAppAction(step.action) ? (
                     <>
                       <div className="mb-2 flex items-center pb-[1.5px]">
                         <Label className="mb-0 flex-none ">
@@ -589,7 +580,9 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
               });
               setConfirmationDialogOpen(false);
             }}>
-            {t("send_sms_to_number", { number: form.getValues(`steps.${step.stepNumber - 1}.sendTo`) })}
+            {t(isSMSAction(step.action) ? "send_sms_to_number" : "send_whatsapp_to_number", {
+              number: form.getValues(`steps.${step.stepNumber - 1}.sendTo`),
+            })}
           </ConfirmationDialogContent>
         </Dialog>
         <Dialog open={isAdditionalInputsDialogOpen} onOpenChange={setIsAdditionalInputsDialogOpen}>

@@ -18,7 +18,7 @@ export function isSMSAction(action?: WorkflowActions) {
   return false;
 }
 
-export function isWhatsappAction(action?: WorkflowActions) {
+export function isWhatsAppAction(action?: WorkflowActions) {
   if (action === WorkflowActions.WHATSAPP_ATTENDEE || action === WorkflowActions.WHATSAPP_NUMBER) {
     return true;
   }

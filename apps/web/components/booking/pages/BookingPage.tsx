@@ -397,7 +397,10 @@ const BookingPage = ({
     eventType.workflows.forEach((workflowReference) => {
       if (workflowReference.workflow.steps.length > 0) {
         workflowReference.workflow.steps.forEach((step) => {
-          if (step.action === WorkflowActions.SMS_ATTENDEE) {
+          if (
+            step.action === WorkflowActions.SMS_ATTENDEE ||
+            step.action === WorkflowActions.WHATSAPP_ATTENDEE
+          ) {
             isSmsReminderNumberNeeded = true;
             isSmsReminderNumberRequired = step.numberRequired || false;
             return;

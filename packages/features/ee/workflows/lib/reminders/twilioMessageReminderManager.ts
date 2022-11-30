@@ -10,6 +10,7 @@ import dayjs from "@calcom/dayjs";
 import prisma from "@calcom/prisma";
 import { Prisma } from "@calcom/prisma/client";
 
+import { isSMSAction } from "../helperFunctions";
 import * as twilio from "./smsProviders/twilioProvider";
 import customTemplate, { VariablesType } from "./templates/customTemplate";
 import smsReminderTemplate from "./templates/smsReminderTemplate";
@@ -37,7 +38,7 @@ export type BookingInfo = {
   customInputs?: Prisma.JsonValue;
 };
 
-export const scheduleSMSReminder = async (
+export const scheduleMessageReminder = async (
   evt: BookingInfo,
   reminderPhone: string | null,
   triggerEvent: WorkflowTriggerEvents,
@@ -63,10 +64,18 @@ export const scheduleSMSReminder = async (
     scheduledDate = timeSpan.time && timeUnit ? dayjs(endTime).add(timeSpan.time, timeUnit) : null;
   }
 
-  const name = action === WorkflowActions.SMS_ATTENDEE ? evt.attendees[0].name : "";
-  const attendeeName = action === WorkflowActions.SMS_ATTENDEE ? evt.organizer.name : evt.attendees[0].name;
+  const name =
+    action === WorkflowActions.SMS_ATTENDEE || action === WorkflowActions.WHATSAPP_ATTENDEE
+      ? evt.attendees[0].name
+      : "";
+  const attendeeName =
+    action === WorkflowActions.SMS_ATTENDEE || action === WorkflowActions.WHATSAPP_ATTENDEE
+      ? evt.organizer.name
+      : evt.attendees[0].name;
   const timeZone =
-    action === WorkflowActions.SMS_ATTENDEE ? evt.attendees[0].timeZone : evt.organizer.timeZone;
+    action === WorkflowActions.SMS_ATTENDEE || action === WorkflowActions.WHATSAPP_ATTENDEE
+      ? evt.attendees[0].timeZone
+      : evt.organizer.timeZone;
 
   switch (template) {
     case WorkflowTemplates.REMINDER:
@@ -98,40 +107,49 @@ export const scheduleSMSReminder = async (
       triggerEvent === WorkflowTriggerEvents.RESCHEDULE_EVENT
     ) {
       try {
-        await twilio.sendSMS(reminderPhone, message, sender);
+        if (isSMSAction(action)) {
+          await twilio.sendSMS(reminderPhone, message, sender);
+        } else {
+          await twilio.sendWhatsApp(reminderPhone, message);
+        }
       } catch (error) {
-        console.log(`Error sending SMS with error ${error}`);
+        console.log(`Error sending message with error ${error}`);
       }
     } else if (
       (triggerEvent === WorkflowTriggerEvents.BEFORE_EVENT ||
         triggerEvent === WorkflowTriggerEvents.AFTER_EVENT) &&
       scheduledDate
     ) {
-      // Can only schedule at least 60 minutes in advance and at most 7 days in advance
+      // Can only schedule at least 15 minutes in advance and at most 7 days in advance
       if (
-        currentDate.isBefore(scheduledDate.subtract(1, "hour")) &&
+        currentDate.isBefore(scheduledDate.subtract(15, "minute")) &&
         !scheduledDate.isAfter(currentDate.add(7, "day"))
       ) {
         try {
-          const scheduledSMS = await twilio.scheduleSMS(
-            reminderPhone,
-            message,
-            scheduledDate.toDate(),
-            sender
-          );
+          let scheduledMessage;
+          if (isSMSAction(action)) {
+            scheduledMessage = await twilio.scheduleSMS(
+              reminderPhone,
+              message,
+              scheduledDate.toDate(),
+              sender
+            );
+          } else {
+            scheduledMessage = await twilio.scheduleWhatsApp(reminderPhone, message, scheduledDate.toDate());
+          }
 
           await prisma.workflowReminder.create({
             data: {
               bookingUid: uid,
               workflowStepId: workflowStepId,
-              method: WorkflowMethods.SMS,
+              method: isSMSAction(action) ? WorkflowMethods.SMS : WorkflowMethods.WHATSAPP,
               scheduledDate: scheduledDate.toDate(),
               scheduled: true,
-              referenceId: scheduledSMS.sid,
+              referenceId: scheduledMessage.sid,
             },
           });
         } catch (error) {
-          console.log(`Error scheduling SMS with error ${error}`);
+          console.log(`Error scheduling message with error ${error}`);
         }
       } else if (scheduledDate.isAfter(currentDate.add(7, "day"))) {
         // Write to DB and send to CRON if scheduled reminder date is past 7 days
@@ -139,7 +157,7 @@ export const scheduleSMSReminder = async (
           data: {
             bookingUid: uid,
             workflowStepId: workflowStepId,
-            method: WorkflowMethods.SMS,
+            method: isSMSAction(action) ? WorkflowMethods.SMS : WorkflowMethods.WHATSAPP,
             scheduledDate: scheduledDate.toDate(),
             scheduled: false,
           },
@@ -149,9 +167,9 @@ export const scheduleSMSReminder = async (
   }
 };
 
-export const deleteScheduledSMSReminder = async (referenceId: string) => {
+export const deleteScheduledMessageReminder = async (referenceId: string) => {
   try {
-    await twilio.cancelSMS(referenceId);
+    await twilio.cancelMessage(referenceId);
   } catch (error) {
     console.log(`Error canceling reminder with error ${error}`);
   }

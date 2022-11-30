@@ -8,9 +8,9 @@ import {
 
 import type { CalendarEvent } from "@calcom/types/Calendar";
 
-import { isEmailAction, isSMSAction } from "../helperFunctions";
+import { isEmailAction, isSMSAction, isWhatsAppAction } from "../helperFunctions";
 import { scheduleEmailReminder } from "./emailReminderManager";
-import { scheduleSMSReminder } from "./smsReminderManager";
+import { scheduleMessageReminder } from "./twilioMessageReminderManager";
 
 export const scheduleWorkflowReminders = async (
   workflows: (WorkflowsOnEventTypes & {
@@ -38,9 +38,13 @@ export const scheduleWorkflowReminders = async (
         workflow.trigger === WorkflowTriggerEvents.AFTER_EVENT
       ) {
         workflow.steps.forEach(async (step) => {
-          if (isSMSAction(step.action)) {
-            const sendTo = step.action === WorkflowActions.SMS_ATTENDEE ? smsReminderNumber : step.sendTo;
-            await scheduleSMSReminder(
+          if (isSMSAction(step.action) || isWhatsAppAction(step.action)) {
+            const sendTo =
+              step.action === WorkflowActions.SMS_ATTENDEE ||
+              step.action === WorkflowActions.WHATSAPP_ATTENDEE
+                ? smsReminderNumber
+                : step.sendTo;
+            await scheduleMessageReminder(
               evt,
               sendTo,
               workflow.trigger,
@@ -105,7 +109,7 @@ export const sendCancelledReminders = async (
         workflow.steps.forEach(async (step) => {
           if (isSMSAction(step.action)) {
             const sendTo = step.action === WorkflowActions.SMS_ATTENDEE ? smsReminderNumber : step.sendTo;
-            await scheduleSMSReminder(
+            await scheduleMessageReminder(
               evt,
               sendTo,
               workflow.trigger,

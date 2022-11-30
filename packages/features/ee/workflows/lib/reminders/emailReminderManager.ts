@@ -11,9 +11,9 @@ import sgMail from "@sendgrid/mail";
 import dayjs from "@calcom/dayjs";
 import prisma from "@calcom/prisma";
 
-import { BookingInfo, timeUnitLowerCase } from "./smsReminderManager";
 import customTemplate, { VariablesType } from "./templates/customTemplate";
 import emailReminderTemplate from "./templates/emailReminderTemplate";
+import { BookingInfo, timeUnitLowerCase } from "./twilioMessageReminderManager";
 
 let sendgridAPIKey, senderEmail: string;
 

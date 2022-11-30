@@ -31,6 +31,18 @@ export const sendSMS = async (phoneNumber: string, body: string, sender: string)
   return response;
 };
 
+export const sendWhatsApp = async (phoneNumber: string, body: string) => {
+  assertTwilio(twilio);
+  const response = await twilio.messages.create({
+    body: body,
+    messagingServiceSid: process.env.TWILIO_MESSAGING_SID,
+    to: `whatsapp:${phoneNumber}`,
+    from: `whatsapp:+14155238886`,
+  });
+
+  return response;
+};
+
 export const scheduleSMS = async (phoneNumber: string, body: string, scheduledDate: Date, sender: string) => {
   assertTwilio(twilio);
   const response = await twilio.messages.create({
@@ -45,7 +57,21 @@ export const scheduleSMS = async (phoneNumber: string, body: string, scheduledDa
   return response;
 };
 
-export const cancelSMS = async (referenceId: string) => {
+export const scheduleWhatsApp = async (phoneNumber: string, body: string, scheduledDate: Date) => {
+  assertTwilio(twilio);
+  const response = await twilio.messages.create({
+    body: body,
+    messagingServiceSid: process.env.TWILIO_MESSAGING_SID,
+    to: `whatsapp:${phoneNumber}`,
+    scheduleType: "fixed",
+    sendAt: scheduledDate,
+    from: `whatsapp:+14155238886`,
+  });
+
+  return response;
+};
+
+export const cancelMessage = async (referenceId: string) => {
   assertTwilio(twilio);
   await twilio.messages(referenceId).update({ status: "canceled" });
 };

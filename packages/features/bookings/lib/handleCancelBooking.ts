@@ -18,7 +18,7 @@ import dayjs from "@calcom/dayjs";
 import { sendCancelledEmails } from "@calcom/emails";
 import { deleteScheduledEmailReminder } from "@calcom/features/ee/workflows/lib/reminders/emailReminderManager";
 import { sendCancelledReminders } from "@calcom/features/ee/workflows/lib/reminders/reminderScheduler";
-import { deleteScheduledSMSReminder } from "@calcom/features/ee/workflows/lib/reminders/smsReminderManager";
+import { deleteScheduledMessageReminder } from "@calcom/features/ee/workflows/lib/reminders/twilioMessageReminderManager";
 import getWebhooks from "@calcom/features/webhooks/lib/getWebhooks";
 import sendPayload, { EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
 import { isPrismaObjOrUndefined, parseRecurringEvent } from "@calcom/lib";
@@ -368,8 +368,8 @@ async function handler(req: NextApiRequest & { userId?: number }) {
       if (reminder.scheduled && reminder.referenceId) {
         if (reminder.method === WorkflowMethods.EMAIL) {
           deleteScheduledEmailReminder(reminder.referenceId);
-        } else if (reminder.method === WorkflowMethods.SMS) {
-          deleteScheduledSMSReminder(reminder.referenceId);
+        } else if (reminder.method === WorkflowMethods.SMS || reminder.method === WorkflowMethods.WHATSAPP) {
+          deleteScheduledMessageReminder(reminder.referenceId);
         }
       }
       const reminderToDelete = prisma.workflowReminder.deleteMany({
