@@ -39,7 +39,7 @@ import {
   getWorkflowTemplateOptions,
   getWorkflowTriggerOptions,
 } from "../lib/getOptions";
-import { isEmailAction, isSMSAction } from "../lib/helperFunctions";
+import { isEmailAction, isSMSAction, isWhatsappAction } from "../lib/helperFunctions";
 import { translateVariablesToEnglish } from "../lib/variableTranslations";
 import type { FormValues } from "../pages/workflow";
 import Editor from "./TextEditor/Editor";
@@ -59,7 +59,9 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   const [isPhoneNumberNeeded, setIsPhoneNumberNeeded] = useState(
-    step?.action === WorkflowActions.SMS_NUMBER ? true : false
+    step?.action === WorkflowActions.SMS_NUMBER || step?.action === WorkflowActions.WHATSAPP_NUMBER
+      ? true
+      : false
   );
 
   const [isSenderIdNeeded, setIsSenderIdNeeded] = useState(isSMSAction(step?.action));
@@ -286,10 +288,13 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                             const oldValue = form.getValues(`steps.${step.stepNumber - 1}.action`);
                             const wasSMSAction = isSMSAction(oldValue);
 
-                            if (isSMSAction(val.value)) {
+                            if (isSMSAction(val.value) || isWhatsappAction(val.value)) {
                               setIsSenderIdNeeded(true);
                               setIsEmailAddressNeeded(false);
-                              setIsPhoneNumberNeeded(val.value === WorkflowActions.SMS_NUMBER);
+                              setIsPhoneNumberNeeded(
+                                val.value === WorkflowActions.SMS_NUMBER ||
+                                  val.value === WorkflowActions.WHATSAPP_NUMBER
+                              );
 
                               if (!wasSMSAction) {
                                 form.setValue(`steps.${step.stepNumber - 1}.reminderBody`, "");
@@ -361,7 +366,9 @@ export default function WorkflowStepContainer(props: WorkflowStepProps) {
                   )}
                 </div>
               )}
-              {form.getValues(`steps.${step.stepNumber - 1}.action`) === WorkflowActions.SMS_ATTENDEE && (
+              {(form.getValues(`steps.${step.stepNumber - 1}.action`) === WorkflowActions.SMS_ATTENDEE ||
+                form.getValues(`steps.${step.stepNumber - 1}.action`) ===
+                  WorkflowActions.WHATSAPP_ATTENDEE) && (
                 <div className="mt-2">
                   <Controller
                     name={`steps.${step.stepNumber - 1}.numberRequired`}
