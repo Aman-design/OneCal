@@ -35,15 +35,11 @@ export const getEmbedIframe = async ({ page, pathname }: { page: Page; pathname:
   // We can't seem to access page.frame till contentWindow is available. So wait for that.
   await page.evaluate(() => {
     return new Promise((resolve) => {
-      const iframe = document.querySelector(".cal-embed") as HTMLIFrameElement;
-      if (!iframe) {
-        resolve(false);
-        return;
-      }
       const interval = setInterval(() => {
+        const iframe = document.querySelector(".cal-embed") as HTMLIFrameElement;
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        if (iframe.contentWindow && window.iframeReady) {
+        if (iframe && iframe.contentWindow && window.iframeReady) {
           clearInterval(interval);
           resolve(true);
         }
