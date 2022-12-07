@@ -1,5 +1,6 @@
 import { expect, Page } from "@playwright/test";
 
+import { CAL_URL } from "@calcom/lib/constants";
 import { Fixtures, test } from "@calcom/web/playwright/lib/fixtures";
 
 async function gotoRoutingLink(page: Page, formId: string) {
@@ -104,6 +105,56 @@ test.describe("Routing Forms", () => {
       await page.click('[data-testid="toggle-form"] [value="on"]');
       await gotoRoutingLink(page, formId);
       await page.isVisible("text=ERROR 404");
+    });
+
+    test("should copy link in editing area", async ({ page, context }) => {
+      await page.waitForSelector('[data-testid="empty-screen"]');
+      context.grantPermissions(["clipboard-read", "clipboard-write"]);
+      await page.goto(`/apps/typeform`);
+      await page.click('[data-testid="install-app-button"]');
+      await page.waitForNavigation({
+        url: (url) => url.pathname === `/apps/typeform/how-to-use`,
+      });
+
+      await page.goto(`/apps/routing-forms/forms`);
+      const formId = await addForm(page);
+      await fillForm(page, {
+        description: "",
+        field: { label: "test", typeIndex: 1 },
+      });
+
+      await page.click('button[tooltip="Delete"] ~ button[data-state="closed"]');
+      await page.locator("text=Copy Typeform Redirect URL").click();
+      const text = await page.evaluate(async () => {
+        return navigator.clipboard.readText();
+      });
+      expect(text).toBe(`${CAL_URL}/router?form=${formId}&test={Recalled_Response_For_This_Field}`);
+    });
+
+    test("should copy link in RoutingForms list", async ({ page, context }) => {
+      await page.waitForSelector('[data-testid="empty-screen"]');
+      context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+      await page.goto(`/apps/typeform`);
+      await page.click('[data-testid="install-app-button"]');
+      await page.waitForNavigation({
+        url: (url) => url.pathname === `/apps/typeform/how-to-use`,
+      });
+
+      await page.goto("/apps/routing-forms/forms");
+      const formId = await addForm(page);
+      await fillForm(page, {
+        description: "",
+        field: { label: "test", typeIndex: 1 },
+      });
+
+      await page.goto("/apps/routing-forms/forms");
+      await page.click('button[tooltip="Copy link to form"] ~ button[data-state="closed"]');
+      await page.locator("text=Copy Typeform Redirect URL").click();
+      const text = await page.evaluate(async () => {
+        return navigator.clipboard.readText();
+      });
+      expect(text).toBe(`${CAL_URL}/router?form=${formId}&test={Recalled_Response_For_This_Field}`);
     });
 
     test("should be able to edit the form", async ({ page }) => {
