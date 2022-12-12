@@ -29,10 +29,7 @@ import { trpc } from "@calcom/trpc/react";
 import { Icon, DatePicker } from "@calcom/ui";
 
 import { timeZone as localStorageTimeZone } from "@lib/clock";
-// import { timeZone } from "@lib/clock";
-import { useExposePlanGlobally } from "@lib/hooks/useExposePlanGlobally";
 import useRouterQuery from "@lib/hooks/useRouterQuery";
-import { isBrandingHidden } from "@lib/isBrandingHidden";
 
 import Gates, { Gate, GateState } from "@components/Gates";
 import AvailableTimes from "@components/booking/AvailableTimes";
@@ -280,9 +277,6 @@ const AvailabilityPage = ({ profile, eventType, ...restProps }: Props) => {
     setTimeZone(localStorageTimeZone() || dayjs.tz.guess());
   }, []);
 
-  // TODO: Improve this;
-  useExposePlanGlobally(eventType.users.length === 1 ? eventType.users[0].plan : "PRO");
-
   const [recurringEventCount, setRecurringEventCount] = useState(eventType.recurringEvent?.count);
 
   const telemetry = useTelemetry();
@@ -442,7 +436,8 @@ const AvailabilityPage = ({ profile, eventType, ...restProps }: Props) => {
                 />
               </div>
             </div>
-            {(!restProps.isBrandingHidden || isEmbed) && <PoweredByCal />}
+            {/* FIXME: We don't show branding in Embed yet because we need to place branding on top of the main content. Keeping it outside the main content would have visibility issues because outside main content background is transparent */}
+            {!restProps.isBrandingHidden && !isEmbed && <PoweredByCal />}
           </div>
         </main>
       </div>
