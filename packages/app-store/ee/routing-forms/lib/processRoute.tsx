@@ -3,7 +3,7 @@ import { Utils as QbUtils } from "react-awesome-query-builder";
 
 import { getQueryBuilderConfig } from "../pages/route-builder/[...appPages]";
 import { Response, Route, SerializableForm } from "../types/types";
-import { App_RoutingForms_Form } from ".prisma/client";
+import { App_RoutingForms_Form } from "@prisma/client";
 
 export function processRoute({
   form,

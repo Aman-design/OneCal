@@ -32,7 +32,7 @@ import { EmbedButton, EmbedDialog } from "@components/Embed";
 
 import getFieldIdentifier from "../lib/getFieldIdentifier";
 import { SerializableForm } from "../types/types";
-import { App_RoutingForms_Form } from ".prisma/client";
+import { App_RoutingForms_Form } from "@prisma/client";
 
 type RoutingForm = SerializableForm<App_RoutingForms_Form>;
 

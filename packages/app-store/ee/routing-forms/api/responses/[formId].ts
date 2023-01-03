@@ -4,7 +4,7 @@ import prisma from "@calcom/prisma";
 
 import { getSerializableForm } from "../../lib/getSerializableForm";
 import { Response, SerializableForm } from "../../types/types";
-import { App_RoutingForms_Form } from ".prisma/client";
+import { App_RoutingForms_Form } from "@prisma/client";
 
 function escapeCsvText(str: string) {
   return str.replace(/,/, "%2C");
