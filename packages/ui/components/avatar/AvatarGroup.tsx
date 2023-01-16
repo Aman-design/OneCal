@@ -41,9 +41,9 @@ export const AvatarGroup = function AvatarGroup(props: AvatarGroupProps) {
           }
           // Always display the first Four items items
           return (
-            <li key={enumerator} className="-mr-4 inline-block">
+            <li key={enumerator} className="-mr-1 inline-block">
               <Avatar
-                className="border-gray-200"
+                className="border border-white"
                 imageSrc={item.image}
                 title={item.title}
                 alt={item.alt || ""}

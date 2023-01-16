@@ -32,6 +32,7 @@ export function Avatar(props: AvatarProps) {
     <AvatarPrimitive.Root
       className={classNames(
         sizeClassname,
+        props.className,
         "dark:bg-darkgray-300 relative inline-block aspect-square overflow-hidden rounded-full"
       )}>
       <AvatarPrimitive.Image src={imageSrc ?? undefined} alt={alt} className={rootClass} />
