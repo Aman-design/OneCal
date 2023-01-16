@@ -10,6 +10,7 @@ import {
   Dropdown,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownItem,
   DropdownMenuTrigger,
   Icon,
 } from "@calcom/ui";
@@ -66,7 +67,7 @@ export default function TeamInviteListItem(props: Props) {
         alt="Team Logo"
         className=""
       />
-      <div className="ml-3 inline-block">
+      <div className="inline-block ltr:ml-3 rtl:mr-3">
         <span className="text-sm font-semibold text-black">{team.name}</span>
         <span className="block text-sm leading-5 text-gray-700">
           {t("invited_by_team", { teamName: team.name, role: t(team.role.toLocaleLowerCase()) })}
@@ -110,22 +111,18 @@ export default function TeamInviteListItem(props: Props) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem>
-                    <Button
-                      color="destructive"
-                      className="w-full rounded-none font-medium"
-                      StartIcon={Icon.FiCheck}
-                      onClick={acceptInvite}>
+                    <DropdownItem type="button" StartIcon={Icon.FiCheck} onClick={acceptInvite}>
                       {t("accept")}
-                    </Button>
+                    </DropdownItem>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Button
+                    <DropdownItem
                       color="destructive"
-                      className="w-full rounded-none font-medium"
+                      type="button"
                       StartIcon={Icon.FiX}
                       onClick={declineInvite}>
                       {t("reject")}
-                    </Button>
+                    </DropdownItem>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </Dropdown>

@@ -1,6 +1,7 @@
 import { GetServerSidePropsContext } from "next";
 import { useState } from "react";
 
+import { getLayout } from "@calcom/features/settings/layouts/SettingsLayout";
 import { useLocale } from "@calcom/lib/hooks/useLocale";
 import { trpc } from "@calcom/trpc/react";
 import {
@@ -12,8 +13,8 @@ import {
   Dropdown,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownItem,
   DropdownMenuTrigger,
-  getSettingsLayout as getLayout,
   Icon,
   List,
   ListItem,
@@ -82,8 +83,8 @@ const ConferencingLayout = () => {
                     app.logo && <img className="h-10 w-10" src={app.logo} alt={app.title} />
                   }
                   <div className="flex-grow truncate pl-2">
-                    <ListItemTitle component="h3" className="mb-1 space-x-2">
-                      <h3 className="truncate text-sm font-medium text-neutral-900">{app.title}</h3>
+                    <ListItemTitle component="h3" className="mb-1 space-x-2 rtl:space-x-reverse">
+                      <h3 className="truncate text-sm font-medium text-gray-900">{app.title}</h3>
                     </ListItemTitle>
                     <ListItemText component="p">{app.description}</ListItemText>
                   </div>
@@ -94,16 +95,17 @@ const ConferencingLayout = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem>
-                          <Button
+                          <DropdownItem
+                            type="button"
                             color="destructive"
-                            StartIcon={Icon.FiTrash}
                             disabled={app.isGlobal}
+                            StartIcon={Icon.FiTrash}
                             onClick={() => {
                               setDeleteCredentialId(app.credentialIds[0]);
                               setDeleteAppModal(true);
                             }}>
                             {t("remove_app")}
-                          </Button>
+                          </DropdownItem>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </Dropdown>

@@ -123,6 +123,7 @@ export const viewerTeamsRouter = router({
         logo: z.string().optional(),
         slug: z.string().optional(),
         hideBranding: z.boolean().optional(),
+        hideBookATeamMember: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -150,6 +151,7 @@ export const viewerTeamsRouter = router({
         logo: input.logo,
         bio: input.bio,
         hideBranding: input.hideBranding,
+        hideBookATeamMember: input.hideBookATeamMember,
       };
 
       if (
@@ -249,7 +251,7 @@ export const viewerTeamsRouter = router({
     .input(
       z.object({
         teamId: z.number(),
-        usernameOrEmail: z.string(),
+        usernameOrEmail: z.string().transform((usernameOrEmail) => usernameOrEmail.toLowerCase()),
         role: z.nativeEnum(MembershipRole),
         language: z.string(),
         sendEmailInvitation: z.boolean(),
@@ -319,7 +321,7 @@ export const viewerTeamsRouter = router({
             from: ctx.user.name,
             to: input.usernameOrEmail,
             teamName: team.name,
-            joinLink: `${WEBAPP_URL}/signup?token=${token}&callbackUrl=/settings/teams`,
+            joinLink: `${WEBAPP_URL}/signup?token=${token}&callbackUrl=/teams`,
           });
         }
       } else {
@@ -641,5 +643,60 @@ export const viewerTeamsRouter = router({
       return true;
     });
     return teams;
+  }),
+  listMembers: authedProcedure
+    .input(
+      z.object({
+        teamIds: z.number().array().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const teams = await ctx.prisma.team.findMany({
+        where: {
+          id: {
+            in: input.teamIds,
+          },
+          members: {
+            some: {
+              user: {
+                id: ctx.user.id,
+              },
+            },
+          },
+        },
+        select: {
+          members: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      type UserMap = Record<number, typeof teams[number]["members"][number]["user"]>;
+      // flattern users to be unique by id
+      const users = teams
+        .flatMap((t) => t.members)
+        .reduce((acc, m) => (m.user.id in acc ? acc : { ...acc, [m.user.id]: m.user }), {} as UserMap);
+      return Object.values(users);
+    }),
+  hasTeamPlan: authedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    const hasTeamPlan = await ctx.prisma.membership.findFirst({
+      where: {
+        userId,
+        team: {
+          slug: {
+            not: null,
+          },
+        },
+      },
+    });
+    return { hasTeamPlan: !!hasTeamPlan };
   }),
 });

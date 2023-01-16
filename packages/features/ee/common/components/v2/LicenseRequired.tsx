@@ -13,15 +13,12 @@ type LicenseRequiredProps = {
   children: React.ReactNode;
 };
 
-/**
- * This component will only render it's children if the installation has a valid
- * license.
- */
 const LicenseRequired = ({ children, as = "", ...rest }: LicenseRequiredProps) => {
   const session = useSession();
   const { t } = useLocale();
   const Component = as || Fragment;
   const hasValidLicense = session.data ? session.data.hasValidLicense : null;
+
   return (
     <Component {...rest}>
       {hasValidLicense === null || hasValidLicense ? (

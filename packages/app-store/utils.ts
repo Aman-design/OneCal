@@ -31,14 +31,15 @@ const credentialData = Prisma.validator<Prisma.CredentialArgs>()({
 
 export type CredentialData = Prisma.CredentialGetPayload<typeof credentialData>;
 
-export enum InstalledAppVariants {
-  "conferencing" = "conferencing",
-  "calendar" = "calendar",
-  "payment" = "payment",
-  "analytics" = "analytics",
-  "automation" = "automation",
-  "other" = "other",
-}
+export const InstalledAppVariants = [
+  "conferencing",
+  "calendar",
+  "payment",
+  "analytics",
+  "automation",
+  "other",
+  "web3",
+] as const;
 
 export const ALL_APPS = Object.values(ALL_APPS_MAP);
 
@@ -76,7 +77,10 @@ export function getLocationGroupedOptions(integrations: ReturnType<typeof getApp
   const apps: Record<string, { label: string; value: string; disabled?: boolean; icon?: string }[]> = {};
   integrations.forEach((app) => {
     if (app.locationOption) {
-      const category = app.category;
+      // All apps that are labeled as a locationOption are video apps. Extract the secondary category if available
+      let category =
+        app.categories.length >= 2 ? app.categories.find((category) => category !== "video") : app.category;
+      if (!category) category = "video";
       const option = { ...app.locationOption, icon: app.imageSrc };
       if (apps[category]) {
         apps[category] = [...apps[category], option];
@@ -113,7 +117,10 @@ export function getLocationGroupedOptions(integrations: ReturnType<typeof getApp
   for (const category in apps) {
     const tmp = { label: category, options: apps[category] };
     if (tmp.label === "in person") {
-      tmp.options.map((l) => ({ ...l, label: t(l.value) }));
+      tmp.options = tmp.options.map((l) => ({
+        ...l,
+        label: t(l.label),
+      }));
     } else {
       tmp.options.map((l) => ({
         ...l,

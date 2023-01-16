@@ -104,7 +104,7 @@ export default function MemberListItem(props: Props) {
               className="h-10 w-10 rounded-full"
             />
 
-            <div className="ml-3 inline-block">
+            <div className="inline-block ltr:ml-3 rtl:mr-3">
               <div className="mb-1 flex">
                 <span className="mr-1 text-sm font-bold leading-4">{name}</span>
 
@@ -165,21 +165,20 @@ export default function MemberListItem(props: Props) {
                         type="button"
                         onClick={() => setShowChangeMemberRoleModal(true)}
                         StartIcon={Icon.FiEdit2}>
-                        {t("edit") as string}
+                        {t("edit")}
                       </DropdownItem>
                     </DropdownMenuItem>
                     {impersonationMode && (
                       <>
                         <DropdownMenuItem>
-                          <Button
+                          <DropdownItem
+                            type="button"
                             onClick={() => setShowImpersonateModal(true)}
-                            color="minimal"
-                            StartIcon={Icon.FiLock}
-                            className="w-full flex-shrink-0 font-normal">
+                            StartIcon={Icon.FiLock}>
                             {t("impersonate")}
-                          </Button>
+                          </DropdownItem>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="h-px bg-gray-200" />
+                        <DropdownMenuSeparator />
                       </>
                     )}
                     <DropdownMenuItem>
