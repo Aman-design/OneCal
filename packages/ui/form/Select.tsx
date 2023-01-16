@@ -66,7 +66,7 @@ export function UnstyledSelect<
   Option,
   IsMulti extends boolean = false,
   Group extends GroupBase<Option> = GroupBase<Option>
->({ className, ...props }: SelectProps<Option, IsMulti, Group>) {
+>({ ...props }: SelectProps<Option, IsMulti, Group>) {
   return (
     <ReactSelect
       {...props}
@@ -86,14 +86,6 @@ export function UnstyledSelect<
           backgroundColor: " transparent",
           border: "none",
           boxShadow: "none",
-        }),
-        option: (provided, state) => ({
-          ...provided,
-          color: state.isSelected ? "var(--brand-text-color)" : "black",
-          ":active": {
-            backgroundColor: state.isSelected ? "" : "var(--brand-color)",
-            color: "var(--brand-text-color)",
-          },
         }),
         indicatorSeparator: () => ({
           display: "hidden",
