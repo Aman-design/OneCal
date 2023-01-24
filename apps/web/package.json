@@ -79,6 +79,7 @@
     "lottie-react": "^2.3.1",
     "markdown-it": "^13.0.1",
     "memory-cache": "^0.2.0",
+    "mercadopago": "^1.5.14",
     "micro": "^9.4.1",
     "mime-types": "^2.1.35",
     "next": "^13.1.1",

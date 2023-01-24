@@ -37,6 +37,7 @@ export const EventTypeAddonMap = {
   fathom: dynamic(() => import("./fathom/extensions/EventTypeAppCard")),
   ga4: dynamic(() => import("./ga4/extensions/EventTypeAppCard")),
   giphy: dynamic(() => import("./giphy/extensions/EventTypeAppCard")),
+  mercado_pago: dynamic(() => import("./mercado_pago/extensions/EventTypeAppCard")),
   plausible: dynamic(() => import("./plausible/extensions/EventTypeAppCard")),
   qr_code: dynamic(() => import("./qr_code/extensions/EventTypeAppCard")),
   rainbow: dynamic(() => import("./rainbow/extensions/EventTypeAppCard")),

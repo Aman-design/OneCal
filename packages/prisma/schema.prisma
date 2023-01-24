@@ -387,6 +387,7 @@ model ReminderMail {
 
 enum PaymentType {
   STRIPE
+  MERCADO_PAGO
 }
 
 model Payment {
