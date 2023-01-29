@@ -315,6 +315,7 @@ model Booking {
   scheduledJobs         String[]
   /// @zod.custom(imports.bookingMetadataSchema)
   metadata              Json?
+  isRecordingExist      Boolean              @default(false)
 }
 
 model Schedule {

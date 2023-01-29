@@ -282,6 +282,7 @@ export const bookingsRouter = router({
           },
           rescheduled: true,
           references: true,
+          isRecordingExist: true,
         },
         orderBy,
         take: take + 1,
