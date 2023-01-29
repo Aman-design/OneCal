@@ -55,6 +55,7 @@ export const buildBooking = (booking?: Partial<Booking>): Booking => {
     smsReminderNumber: null,
     scheduledJobs: [],
     metadata: null,
+    isRecordingExist: false,
     ...booking,
   };
 };
