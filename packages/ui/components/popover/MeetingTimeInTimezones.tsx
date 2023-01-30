@@ -8,7 +8,14 @@ import {
 } from "@calcom/lib/date-fns";
 import { FiGlobe } from "@calcom/ui/components/icon";
 
-import { Attendee } from ".prisma/client";
+type Attendee = {
+  id: number;
+  email: string;
+  name: string;
+  timeZone: string;
+  locale: string | null;
+  bookingId: number | null;
+};
 
 interface MeetingTimeInTimezonesProps {
   attendees: Attendee[];

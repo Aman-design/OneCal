@@ -2,13 +2,13 @@ import React, { FC } from "react";
 import { IconType } from "react-icons/lib";
 
 import {
-  Button,
   Dropdown,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownItem,
   DropdownMenuPortal,
   DropdownMenuTrigger,
+  Button,
   ButtonBaseProps,
 } from "@calcom/ui";
 import { FiChevronDown, FiMoreHorizontal } from "@calcom/ui/components/icon";
