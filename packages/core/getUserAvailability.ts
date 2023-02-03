@@ -101,7 +101,7 @@ const checkDateFromToIsValid = (dateFrom: Dayjs, dateTo: Dayjs) => {
 const findValidUser = async ({
   initalUser,
   username,
-  uerId,
+  userId,
 }: {
   initalUser?: User;
   username?: string;
@@ -124,7 +124,7 @@ const findValidEventType = async ({
   initalEventType?: EventType;
   eventTypeId?: number;
 }) => {
-  const eventTpe: EventType | null = initalEventType || null;
+  let eventType: EventType | null = initalEventType || null;
   if (!eventType && eventTypeId) eventType = await getEventType(eventTypeId);
   return eventType;
 };
@@ -141,7 +141,7 @@ const getCurrentSeatsIfExists = async ({
   dateTo: Dayjs;
 }) => {
   /* Current logic is if a booking is in a time slot mark it as busy, but seats can have more than one attendee so grab
-  current booings with a seats event type and display them on the calendar, even if they are full */
+  current bookings with a seats event type and display them on the calendar, even if they are full */
   let currentSeats: CurrentSeats | null = initialData?.currentSeats || null;
   if (!currentSeats && eventType?.seatsPerTimeSlot) {
     currentSeats = await getCurrentSeats(eventType.id, dateFrom, dateTo);
