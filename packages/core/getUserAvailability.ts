@@ -93,71 +93,71 @@ export const getCurrentSeats = (eventTypeId: number, dateFrom: Dayjs, dateTo: Da
 
 export type CurrentSeats = Awaited<ReturnType<typeof getCurrentSeats>>;
 
-/** This should be called getUsersWorkingHoursAndBusySlots (...and remaining seats, and final timezone) */
-export async function getUserAvailability(
-  query: {
-    withSource?: boolean;
-    username?: string;
-    userId?: number;
-    dateFrom: string;
-    dateTo: string;
-    eventTypeId?: number;
-    afterEventBuffer?: number;
-    beforeEventBuffer?: number;
-  },
-  initialData?: {
-    user?: User;
-    eventType?: EventType;
-    currentSeats?: CurrentSeats;
-  }
-) {
-  const { username, userId, dateFrom, dateTo, eventTypeId, afterEventBuffer, beforeEventBuffer } =
-    availabilitySchema.parse(query);
-
+const checkDateFromToIsValid = (dateFrom: Dayjs, dateTo: Dayjs) => {
   if (!dateFrom.isValid() || !dateTo.isValid())
     throw new HttpError({ statusCode: 400, message: "Invalid time range given." });
+};
 
+const findValidUser = async ({
+  initalUser,
+  username,
+  uerId,
+}: {
+  initalUser?: User;
+  username?: string;
+  userId?: number;
+}) => {
   const where: Prisma.UserWhereUniqueInput = {};
   if (username) where.username = username;
   if (userId) where.id = userId;
 
-  let user: User | null = initialData?.user || null;
+  let user: User | null = initalUser || null;
   if (!user) user = await getUser(where);
   if (!user) throw new HttpError({ statusCode: 404, message: "No user found" });
+  return user;
+};
 
-  let eventType: EventType | null = initialData?.eventType || null;
+const findValidEventType = async ({
+  initalEventType,
+  eventTypeId,
+}: {
+  initalEventType?: EventType;
+  eventTypeId?: number;
+}) => {
+  const eventTpe: EventType | null = initalEventType || null;
   if (!eventType && eventTypeId) eventType = await getEventType(eventTypeId);
+  return eventType;
+};
 
+const getCurrentSeatsIfExists = async ({
+  initialData,
+  eventType,
+  dateFrom,
+  dateTo,
+}: {
+  initialData?: { currentSeats?: CurrentSeats };
+  eventType?: EventType;
+  dateFrom: Dayjs;
+  dateTo: Dayjs;
+}) => {
   /* Current logic is if a booking is in a time slot mark it as busy, but seats can have more than one attendee so grab
-  current bookings with a seats event type and display them on the calendar, even if they are full */
+  current booings with a seats event type and display them on the calendar, even if they are full */
   let currentSeats: CurrentSeats | null = initialData?.currentSeats || null;
   if (!currentSeats && eventType?.seatsPerTimeSlot) {
     currentSeats = await getCurrentSeats(eventType.id, dateFrom, dateTo);
   }
+  return currentSeats;
+};
 
+async function handleBookingLimits(
+  dateFrom: Dayjs,
+  dateTo: Dayjs,
+  busyTimes: EventBusyDetails[],
+  eventType: Awaited<ReturnType<typeof findValidEventType>>,
+  externalBusyTimes: EventBusyDetails[]
+) {
   const bookingLimits = parseBookingLimit(eventType?.bookingLimits);
-
-  const { selectedCalendars, ...currentUser } = user;
-
-  const busyTimes = await getBusyTimes({
-    credentials: currentUser.credentials,
-    startTime: dateFrom.toISOString(),
-    endTime: dateTo.toISOString(),
-    eventTypeId,
-    userId: currentUser.id,
-    selectedCalendars,
-    beforeEventBuffer,
-    afterEventBuffer,
-  });
-
-  const bufferedBusyTimes: EventBusyDetails[] = busyTimes.map((a) => ({
-    ...a,
-    start: dayjs(a.start).toISOString(),
-    end: dayjs(a.end).toISOString(),
-    title: a.title,
-    source: query.withSource ? a.source : undefined,
-  }));
-
+  const bufferedBusyTimes = externalBusyTimes;
   if (bookingLimits) {
     // Get all dates between dateFrom and dateTo
     const dates = []; // this is as dayjs date
@@ -221,30 +221,82 @@ export async function getUserAvailability(
       }
     }
   }
+  return bufferedBusyTimes;
+}
 
+const getUserSchedule = (
+  currentUser: Omit<Awaited<ReturnType<typeof findValidUser>>, "selectedCalendars">,
+  eventType: Awaited<ReturnType<typeof findValidEventType>>
+) => {
   const userSchedule = currentUser.schedules.filter(
     (schedule) => !currentUser.defaultScheduleId || schedule.id === currentUser.defaultScheduleId
   )[0];
 
-  const schedule =
-    !eventType?.metadata?.config?.useHostSchedulesForTeamEvent && eventType?.schedule
-      ? { ...eventType?.schedule }
-      : {
-          ...userSchedule,
-          availability: userSchedule.availability.map((a) => ({
-            ...a,
-            userId: currentUser.id,
-          })),
-        };
+  return !eventType?.metadata?.config?.useHostSchedulesForTeamEvent && eventType?.schedule
+    ? { ...eventType?.schedule }
+    : {
+        ...userSchedule,
+        availability: userSchedule.availability.map((a) => ({
+          ...a,
+          userId: currentUser.id,
+        })),
+      };
+};
 
+/** This should be called getUsersWorkingHoursAndBusySlots (...and remaining seats, and final timezone) */
+export async function getUserAvailability(
+  query: {
+    withSource?: boolean;
+    username?: string;
+    userId?: number;
+    dateFrom: string;
+    dateTo: string;
+    eventTypeId?: number;
+    afterEventBuffer?: number;
+    beforeEventBuffer?: number;
+  },
+  initialData?: {
+    user?: User;
+    eventType?: EventType;
+    currentSeats?: CurrentSeats;
+  }
+) {
+  const { username, userId, dateFrom, dateTo, eventTypeId, afterEventBuffer, beforeEventBuffer } =
+    availabilitySchema.parse(query);
+
+  checkDateFromToIsValid(dateFrom, dateTo);
+  const user = await findValidUser({ initalUser: initialData?.user, username, userId });
+  const eventType = await findValidEventType({ initalEventType: initialData?.eventType, eventTypeId });
+  const currentSeats = await getCurrentSeatsIfExists({ initialData, eventType, dateFrom, dateTo });
+
+  const { selectedCalendars, ...currentUser } = user;
+
+  const busyTimes = await getBusyTimes({
+    credentials: currentUser.credentials,
+    startTime: dateFrom.toISOString(),
+    endTime: dateTo.toISOString(),
+    eventTypeId,
+    userId: currentUser.id,
+    selectedCalendars,
+    beforeEventBuffer,
+    afterEventBuffer,
+  });
+
+  let bufferedBusyTimes: EventBusyDetails[] = busyTimes.map((a) => ({
+    ...a,
+    start: dayjs(a.start).toISOString(),
+    end: dayjs(a.end).toISOString(),
+    title: a.title,
+    source: query.withSource ? a.source : undefined,
+  }));
+  bufferedBusyTimes = await handleBookingLimits(dateFrom, dateTo, busyTimes, eventType, bufferedBusyTimes);
+
+  const schedule = getUserSchedule(currentUser, eventType);
   const startGetWorkingHours = performance.now();
-
   const timeZone = schedule.timeZone || eventType?.timeZone || currentUser.timeZone;
-
   const availability =
     schedule.availability ||
     (eventType?.availability.length ? eventType.availability : currentUser.availability);
-
   const workingHours = getWorkingHours({ timeZone }, availability);
 
   const endGetWorkingHours = performance.now();
