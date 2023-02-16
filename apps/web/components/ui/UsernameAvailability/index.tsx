@@ -1,5 +1,3 @@
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { IS_SELF_HOSTED } from "@calcom/lib/constants";
@@ -19,18 +17,16 @@ interface UsernameAvailabilityFieldProps {
   onErrorMutation?: (error: TRPCClientErrorLike<AppRouter>) => void;
   user: Pick<User, "username" | "metadata">;
 }
+
+// FIXME: This components can be simplified significantly
+// FIXME: This component needs translations
 export const UsernameAvailabilityField = ({
   onSuccessMutation,
   onErrorMutation,
   user,
 }: UsernameAvailabilityFieldProps) => {
-  const router = useRouter();
-  const [currentUsernameState, setCurrentUsernameState] = useState(user.username || "");
-  const { username: usernameFromQuery, setQuery: setUsernameFromQuery } = useRouterQuery("username");
-  const { username: currentUsername, setQuery: setCurrentUsername } =
-    router.query["username"] && user.username === null
-      ? { username: usernameFromQuery, setQuery: setUsernameFromQuery }
-      : { username: currentUsernameState || "", setQuery: setCurrentUsernameState };
+  const { username: currentUsername = user.username || "", setQuery: setCurrentUsername } =
+    useRouterQuery("username");
   const formMethods = useForm({
     defaultValues: {
       username: currentUsername,
