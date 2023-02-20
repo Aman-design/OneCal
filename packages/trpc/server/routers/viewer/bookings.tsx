@@ -1,15 +1,12 @@
-import {
+import type {
   BookingReference,
-  BookingStatus,
   EventType,
-  Prisma,
-  SchedulingType,
   User,
-  WebhookTriggerEvents,
   Workflow,
   WorkflowsOnEventTypes,
   WorkflowStep,
 } from "@prisma/client";
+import { BookingStatus, Prisma, SchedulingType, WebhookTriggerEvents } from "@prisma/client";
 import type { TFunction } from "next-i18next";
 import { z } from "zod";
 
@@ -30,7 +27,8 @@ import {
 } from "@calcom/emails";
 import { scheduleWorkflowReminders } from "@calcom/features/ee/workflows/lib/reminders/reminderScheduler";
 import getWebhooks from "@calcom/features/webhooks/lib/getWebhooks";
-import sendPayload, { EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
+import type { EventTypeInfo } from "@calcom/features/webhooks/lib/sendPayload";
+import sendPayload from "@calcom/features/webhooks/lib/sendPayload";
 import { isPrismaObjOrUndefined, parseRecurringEvent } from "@calcom/lib";
 import logger from "@calcom/lib/logger";
 import { getTranslation } from "@calcom/lib/server";
@@ -282,7 +280,7 @@ export const bookingsRouter = router({
           },
           rescheduled: true,
           references: true,
-          isRecordingExist: true,
+          isRecorded: true,
         },
         orderBy,
         take: take + 1,
@@ -320,7 +318,7 @@ export const bookingsRouter = router({
 
       const recurringInfo = recurringInfoBasic.map(
         (
-          info: typeof recurringInfoBasic[number]
+          info: (typeof recurringInfoBasic)[number]
         ): {
           recurringEventId: string | null;
           count: number;
