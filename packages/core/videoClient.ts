@@ -7,9 +7,9 @@ import { sendBrokenIntegrationEmail } from "@calcom/emails";
 import { getUid } from "@calcom/lib/CalEventParser";
 import logger from "@calcom/lib/logger";
 import { prisma } from "@calcom/prisma";
-import { GetRecordingsResponseSchema } from "@calcom/prisma/zod-utils";
+import type { GetRecordingsResponseSchema } from "@calcom/prisma/zod-utils";
 import type { CalendarEvent, EventBusyDate } from "@calcom/types/Calendar";
-import { CredentialPayload, CredentialWithAppName } from "@calcom/types/Credential";
+import type { CredentialPayload, CredentialWithAppName } from "@calcom/types/Credential";
 import type { EventResult, PartialReference } from "@calcom/types/EventManager";
 import type { VideoApiAdapter, VideoApiAdapterFactory, VideoCallData } from "@calcom/types/VideoApiAdapter";
 
@@ -20,8 +20,10 @@ const translator = short();
 // factory
 const getVideoAdapters = (withCredentials: CredentialPayload[]): VideoApiAdapter[] =>
   withCredentials.reduce<VideoApiAdapter[]>((acc, cred) => {
-    const appName = cred.type.split("_").join(""); // Transform `zoom_video` to `zoomvideo`;
-    const app = appStore[appName as keyof typeof appStore];
+    let app = appStore[cred.type.split("_").join("") as keyof typeof appStore];
+    if (!app) {
+      app = appStore[cred.type.split("_")[0] as keyof typeof appStore];
+    }
     if (app && "lib" in app && "VideoApiAdapter" in app.lib) {
       const makeVideoApiAdapter = app.lib.VideoApiAdapter as VideoApiAdapterFactory;
       const videoAdapter = makeVideoApiAdapter(cred);

@@ -1,0 +1,21 @@
+{
+  "/*": "Don't modify slug - If required, do it using cli edit command",
+  "name": "Sylaps",
+  "slug": "sylaps",
+  "type": "sylaps_video",
+  "logo": "icon.svg",
+  "imageSrc": "icon.svg",
+  "url": "https://sylaps.com/",
+  "variant": "conferencing",
+  "categories": ["video"],
+  "publisher": "Sylaps Inc",
+  "email": "support@sylaps.com",
+  "description": "Free Audio and Video Conferencing, Online Collaboration, Screen Sharing on web browser, mobile and desktop.",
+  "appData": {
+    "location": {
+      "linkType": "dynamic",
+      "type": "integrations:sylaps",
+      "label": "Sylaps"
+    }
+  }
+}
