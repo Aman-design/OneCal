@@ -835,7 +835,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
   ];
 
   return (
-    <DialogContent size="lg" className="rounded-lg p-0.5" type="creation">
+    <DialogContent size="lg" className="rounded-lg p-0.5" enableOverflow type="creation">
       <div className="flex">
         <div className="flex w-1/3 flex-col bg-gray-50 p-8">
           <h3
