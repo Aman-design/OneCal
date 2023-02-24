@@ -1,4 +1,4 @@
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/react-collapsible";
+import { Collapsible, CollapsibleContent } from "@radix-ui/react-collapsible";
 import classNames from "classnames";
 import type { NextRouter } from "next/router";
 import { useRouter } from "next/router";
@@ -22,7 +22,7 @@ import {
   TextField,
   ColorPicker,
 } from "@calcom/ui";
-import { FiCode, FiTrello, FiSun, FiArrowLeft, FiChevronRight } from "@calcom/ui/components/icon";
+import { FiCode, FiTrello, FiSun, FiArrowLeft } from "@calcom/ui/components/icon";
 
 import Select from "@components/ui/form/Select";
 
@@ -313,7 +313,7 @@ const embeds: {
 }[] = [
   {
     title: "Inline Embed",
-    subtitle: "Loads your Cal scheduling page directly inline with your other website content",
+    subtitle: "Loads your event type directly inline with your other website content.",
     type: "inline",
     illustration: (
       <svg
@@ -792,7 +792,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
   }
 
   const ThemeOptions = [
-    { value: Theme.auto, label: "Auto Theme" },
+    { value: Theme.auto, label: "Auto" },
     { value: Theme.dark, label: "Dark Theme" },
     { value: Theme.light, label: "Light Theme" },
   ];
@@ -809,11 +809,14 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
   ];
 
   return (
-    <DialogContent size="xl" className="p-0.5" type="creation">
+    <DialogContent size="lg" className="rounded-lg p-0.5" type="creation">
       <div className="flex">
         <div className="flex w-1/3 flex-col bg-gray-50 p-8">
-          <h3 className="mb-2 flex text-xl font-bold leading-6 text-gray-900" id="modal-title">
+          <h3
+            className="mb-2.5 flex items-center text-xl font-semibold leading-5 text-gray-900"
+            id="modal-title">
             <button
+              className="h-6 w-6"
               onClick={() => {
                 removeQueryParams(router, ["embedType", "embedTabName"]);
               }}>
@@ -821,55 +824,43 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
             </button>
             {embed.title}
           </h3>
-          <hr className={classNames("mt-4", embedType === "element-click" ? "hidden" : "")} />
-          <div className="flex flex-col overflow-y-auto">
-            <div className={classNames("mt-4 font-medium", embedType === "element-click" ? "hidden" : "")}>
+          <h4 className="mb-6 text-sm font-normal text-gray-500">{embed.subtitle}</h4>
+          <div className="flex flex-col">
+            <div className={classNames("font-medium", embedType === "element-click" ? "hidden" : "")}>
               <Collapsible
                 open={isEmbedCustomizationOpen}
                 onOpenChange={() => setIsEmbedCustomizationOpen((val) => !val)}>
-                <CollapsibleTrigger
-                  type="button"
-                  className="flex w-full items-center text-base font-medium text-gray-900">
-                  <div>
-                    {embedType === "inline"
-                      ? "Inline Embed Customization"
-                      : embedType === "floating-popup"
-                      ? "Floating Popup Customization"
-                      : "Element Click Customization"}
-                  </div>
-                  <FiChevronRight
-                    className={`${
-                      isEmbedCustomizationOpen ? "rotate-90 transform" : ""
-                    } ml-auto h-5 w-5 text-gray-500`}
-                  />
-                </CollapsibleTrigger>
                 <CollapsibleContent className="text-sm">
-                  <div className={classNames("mt-6", embedType === "inline" ? "block" : "hidden")}>
+                  <div className={classNames(embedType === "inline" ? "block" : "hidden")}>
                     {/*TODO: Add Auto/Fixed toggle from Figma */}
-                    <div className="text-sm">Embed Window Sizing</div>
-                    <div className="justify-left flex items-center">
-                      <TextField
-                        labelProps={{ className: "hidden" }}
-                        required
-                        value={previewState.inline.width}
-                        onChange={(e) => {
-                          setPreviewState((previewState) => {
-                            const width = e.target.value || "100%";
+                    <div className="mb-[9px] text-sm">Window sizing</div>
+                    <div className="justify-left flex items-center !font-normal">
+                      <div className="mr-[9px]">
+                        <TextField
+                          labelProps={{ className: "hidden" }}
+                          className="focus:ring-offset-0"
+                          required
+                          value={previewState.inline.width}
+                          onChange={(e) => {
+                            setPreviewState((previewState) => {
+                              const width = e.target.value || "100%";
 
-                            return {
-                              ...previewState,
-                              inline: {
-                                ...previewState.inline,
-                                width,
-                              },
-                            };
-                          });
-                        }}
-                        addOnLeading={<>W</>}
-                      />
-                      <span className="p-2">×</span>
+                              return {
+                                ...previewState,
+                                inline: {
+                                  ...previewState.inline,
+                                  width,
+                                },
+                              };
+                            });
+                          }}
+                          addOnLeading={<>W</>}
+                        />
+                      </div>
+
                       <TextField
                         labelProps={{ className: "hidden" }}
+                        className="focus:ring-offset-0"
                         value={previewState.inline.height}
                         required
                         onChange={(e) => {
@@ -997,22 +988,13 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                 </CollapsibleContent>
               </Collapsible>
             </div>
-            <hr className="mt-4" />
-            <div className="mt-4 font-medium">
+            <div className="font-medium">
               <Collapsible
                 open={isBookingCustomizationOpen}
                 onOpenChange={() => setIsBookingCustomizationOpen((val) => !val)}>
-                <CollapsibleTrigger className="flex w-full" type="button">
-                  <div className="text-base  font-medium text-gray-900">Cal Booking Customization</div>
-                  <FiChevronRight
-                    className={`${
-                      isBookingCustomizationOpen ? "rotate-90 transform" : ""
-                    } ml-auto h-5 w-5 text-gray-500`}
-                  />
-                </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="mt-6 text-sm">
-                    <div className="mb-4 flex items-center justify-start space-x-2 rtl:space-x-reverse">
+                    <div className="mb-6 flex items-center justify-start space-x-2 rtl:space-x-reverse">
                       <Switch
                         checked={previewState.hideEventTypeDetails}
                         onCheckedChange={(checked) => {
@@ -1026,28 +1008,31 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       />
                       <div className="text-sm">{t("hide_eventtype_details")}</div>
                     </div>
-                    <Label className="">
-                      <div className="mb-2">Theme</div>
-                      <Select
-                        className="w-full"
-                        defaultValue={ThemeOptions[0]}
-                        components={{
-                          Control: ThemeSelectControl,
-                        }}
-                        onChange={(option) => {
-                          if (!option) {
-                            return;
-                          }
-                          setPreviewState((previewState) => {
-                            return {
-                              ...previewState,
-                              theme: option.value,
-                            };
-                          });
-                        }}
-                        options={ThemeOptions}
-                      />
-                    </Label>
+                    {embedType !== "inline" && (
+                      <Label className="">
+                        <div className="mb-2">Theme</div>
+                        <Select
+                          className="w-full"
+                          defaultValue={ThemeOptions[0]}
+                          components={{
+                            Control: ThemeSelectControl,
+                            IndicatorSeparator: () => null,
+                          }}
+                          onChange={(option) => {
+                            if (!option) {
+                              return;
+                            }
+                            setPreviewState((previewState) => {
+                              return {
+                                ...previewState,
+                                theme: option.value,
+                              };
+                            });
+                          }}
+                          options={ThemeOptions}
+                        />
+                      </Label>
+                    )}
                     {[
                       { name: "brandColor", title: "Brand Color" },
                       // { name: "lightColor", title: "Light Color" },
@@ -1056,8 +1041,8 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       // { name: "highlightColor", title: "Highlight Color" },
                       // { name: "medianColor", title: "Median Color" },
                     ].map((palette) => (
-                      <Label key={palette.name} className="pb-4">
-                        <div className="mb-2 pt-2">{palette.title}</div>
+                      <Label key={palette.name} className="mb-6">
+                        <div className="mb-2">{palette.title}</div>
                         <div className="w-full">
                           <ColorPicker
                             defaultValue="#000000"
@@ -1070,6 +1055,31 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                         </div>
                       </Label>
                     ))}
+                    {embedType === "inline" && (
+                      <Label className="">
+                        <div className="mb-2">Theme</div>
+                        <Select
+                          className="w-full"
+                          defaultValue={ThemeOptions[0]}
+                          components={{
+                            Control: ThemeSelectControl,
+                            IndicatorSeparator: () => null,
+                          }}
+                          onChange={(option) => {
+                            if (!option) {
+                              return;
+                            }
+                            setPreviewState((previewState) => {
+                              return {
+                                ...previewState,
+                                theme: option.value,
+                              };
+                            });
+                          }}
+                          options={ThemeOptions}
+                        />
+                      </Label>
+                    )}
                   </div>
                 </CollapsibleContent>
               </Collapsible>

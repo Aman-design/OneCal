@@ -18,10 +18,10 @@ const ColorPicker = (props: ColorPickerProps) => {
   return (
     <div className=" mt-1 flex items-center justify-center">
       <Popover.Root>
-        <div className="flex items-center rounded-l-md border border-r-0 border-gray-300 p-1.5">
+        <div className="flex h-[38px] w-10 items-center items-center justify-center rounded-l-md border border-r-0 border-gray-300">
           <Popover.Trigger asChild>
             <button
-              className="h-6 w-6 rounded-sm border-2 border-gray-900"
+              className="h-5 w-5 rounded-sm border-2 border-gray-900"
               aria-label="pick colors"
               style={{ backgroundColor: color }}
             />
@@ -31,7 +31,7 @@ const ColorPicker = (props: ColorPickerProps) => {
           <Popover.Content align="center" sideOffset={10}>
             <HexColorPicker
               color={color}
-              className="!h-32 !w-32"
+              className="pointer-events-auto !h-32 !w-32"
               onChange={(val) => {
                 setColor(val);
                 props.onChange(val);
