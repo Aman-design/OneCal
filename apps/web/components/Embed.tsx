@@ -708,6 +708,32 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
     removeQueryParams(router, ["dialog", ...queryParamsForDialog]);
   };
 
+  const themeSelector = () => (
+    <Label className="">
+      <div className="mb-2">Theme</div>
+      <Select
+        className="w-full"
+        defaultValue={ThemeOptions[0]}
+        components={{
+          Control: ThemeSelectControl,
+          IndicatorSeparator: () => null,
+        }}
+        onChange={(option) => {
+          if (!option) {
+            return;
+          }
+          setPreviewState((previewState) => {
+            return {
+              ...previewState,
+              theme: option.value,
+            };
+          });
+        }}
+        options={ThemeOptions}
+      />
+    </Label>
+  );
+
   // Use embed-code as default tab
   if (!router.query.embedTabName) {
     goto(router, {
@@ -1008,31 +1034,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                       />
                       <div className="text-sm">{t("hide_eventtype_details")}</div>
                     </div>
-                    {embedType !== "inline" && (
-                      <Label className="">
-                        <div className="mb-2">Theme</div>
-                        <Select
-                          className="w-full"
-                          defaultValue={ThemeOptions[0]}
-                          components={{
-                            Control: ThemeSelectControl,
-                            IndicatorSeparator: () => null,
-                          }}
-                          onChange={(option) => {
-                            if (!option) {
-                              return;
-                            }
-                            setPreviewState((previewState) => {
-                              return {
-                                ...previewState,
-                                theme: option.value,
-                              };
-                            });
-                          }}
-                          options={ThemeOptions}
-                        />
-                      </Label>
-                    )}
+                    {embedType !== "inline" && themeSelector()}
                     {[
                       { name: "brandColor", title: "Brand Color" },
                       // { name: "lightColor", title: "Light Color" },
@@ -1055,31 +1057,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
                         </div>
                       </Label>
                     ))}
-                    {embedType === "inline" && (
-                      <Label className="">
-                        <div className="mb-2">Theme</div>
-                        <Select
-                          className="w-full"
-                          defaultValue={ThemeOptions[0]}
-                          components={{
-                            Control: ThemeSelectControl,
-                            IndicatorSeparator: () => null,
-                          }}
-                          onChange={(option) => {
-                            if (!option) {
-                              return;
-                            }
-                            setPreviewState((previewState) => {
-                              return {
-                                ...previewState,
-                                theme: option.value,
-                              };
-                            });
-                          }}
-                          options={ThemeOptions}
-                        />
-                      </Label>
-                    )}
+                    {embedType === "inline" && themeSelector()}
                   </div>
                 </CollapsibleContent>
               </Collapsible>
