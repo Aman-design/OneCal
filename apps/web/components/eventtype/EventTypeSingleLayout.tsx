@@ -195,6 +195,7 @@ function EventTypeSingleLayout({
       backPath="/event-types"
       title={eventType.title + " | " + t("event_type")}
       heading={eventType.title}
+      showHeading
       CTA={
         <div className="flex items-center justify-end">
           <div className="hidden items-center rounded-md px-2 sm:hover:bg-gray-100 lg:flex">

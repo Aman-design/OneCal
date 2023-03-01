@@ -187,6 +187,7 @@ type LayoutProps = {
   // Gives the ability to include actions to the right of the heading
   actions?: JSX.Element;
   smallHeading?: boolean;
+  showHeading?: boolean;
 };
 
 const CustomBrandingContainer = () => {
@@ -805,8 +806,9 @@ export function ShellMain(props: LayoutProps) {
               {props.heading && (
                 <h3
                   className={classNames(
-                    "font-cal max-w-28 sm:max-w-72 md:max-w-80 hidden truncate text-xl font-semibold tracking-wide text-black md:block xl:max-w-full",
-                    props.smallHeading ? "text-base" : "text-xl"
+                    "font-cal max-w-28 sm:max-w-72 md:max-w-80 hidden truncate text-lg font-semibold tracking-wide text-black sm:text-xl md:block xl:max-w-full",
+                    props.smallHeading && "text-base",
+                    props.showHeading && "block"
                   )}>
                   {!isLocaleReady ? <SkeletonText invisible /> : props.heading}
                 </h3>
