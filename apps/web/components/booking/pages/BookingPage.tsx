@@ -269,6 +269,7 @@ const BookingPage = ({
   });
 
   const rescheduleUid = router.query.rescheduleUid as string;
+  const timeFormat = router.query.timeFormat;
   useTheme(profile.theme);
   const date = asStringOrNull(router.query.date);
   const querySchema = getBookingResponsesPartialSchema({
@@ -377,6 +378,7 @@ const BookingPage = ({
         timeZone: timeZone(),
         recurringEvent: eventType.recurringEvent,
         recurringCount: parseInt(recurringEventCount.toString()),
+        timeFormat,
       },
       i18n
     );
@@ -507,7 +509,7 @@ const BookingPage = ({
                     <div className="text-sm font-medium">
                       {isClientTimezoneAvailable &&
                         (rescheduleUid || !eventType.recurringEvent?.freq) &&
-                        `${parseDate(date, i18n)}`}
+                        `${parseDate(date, i18n, timeFormat)}`}
                       {isClientTimezoneAvailable &&
                         !rescheduleUid &&
                         eventType.recurringEvent?.freq &&
