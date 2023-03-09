@@ -709,7 +709,7 @@ const EmbedTypeCodeAndPreviewDialogContent = ({
   };
 
   const themeSelector = () => (
-    <Label className="">
+    <Label>
       <div className="mb-2">Theme</div>
       <Select
         className="w-full"
