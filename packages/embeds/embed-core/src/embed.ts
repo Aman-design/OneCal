@@ -6,6 +6,7 @@ import css from "./embed.css";
 import { SdkActionManager } from "./sdk-action-manager";
 import allCss from "./tailwind.generated.css";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rest<T extends any[]> = T extends [any, ...infer U] ? U : never;
 export type Message = {
   originator: string;
@@ -245,20 +246,6 @@ export class Cal {
     return iframe;
   }
 
-  init(namespaceOrConfig?: string | Config, config: Config = {} as Config) {
-    if (typeof namespaceOrConfig !== "string") {
-      config = (namespaceOrConfig || {}) as Config;
-    }
-
-    const { calOrigin: calOrigin, origin: origin, ...restConfig } = config;
-
-    if (origin) {
-      this.__config.calOrigin = calOrigin || origin;
-    }
-
-    this.__config = { ...this.__config, ...restConfig };
-  }
-
   getConfig() {
     return this.__config;
   }
@@ -306,10 +293,7 @@ export class Cal {
         // Iframe might be pre-rendering
         return;
       }
-      let unit = "px";
-      if (data.__unit) {
-        unit = data.__unit;
-      }
+      const unit = "px";
       if (data.iframeHeight) {
         iframe.style.height = data.iframeHeight + unit;
       }
@@ -368,13 +352,15 @@ class CalApi {
     if (typeof namespaceOrConfig !== "string") {
       config = (namespaceOrConfig || {}) as Config;
     }
-    const { origin, ...restConfig } = config;
+
+    const { calOrigin: calOrigin, origin: origin, ...restConfig } = config;
+
     if (origin) {
-      this.cal.__config.origin = origin;
+      this.cal.__config.calOrigin = calOrigin || origin;
     }
+
     this.cal.__config = { ...this.cal.__config, ...restConfig };
   }
-
   /**
    * It is an instruction that adds embed iframe inline as last child of the element
    */
@@ -435,14 +421,16 @@ class CalApi {
     buttonPosition = "bottom-right",
     buttonColor = "rgb(0, 0, 0)",
     buttonTextColor = "rgb(255, 255, 255)",
+    calOrigin,
   }: {
     calLink: string;
     buttonText?: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<"id", string> & Record<string | "id", string>;
     hideButtonIcon?: boolean;
     buttonPosition?: "bottom-left" | "bottom-right";
     buttonColor?: string;
     buttonTextColor?: string;
+    calOrigin?: string;
   }) {
     // validate(arguments[0], {
     //   required: true,
@@ -458,28 +446,27 @@ class CalApi {
     if (attributes?.id) {
       existingEl = document.getElementById(attributes.id);
     }
-    let el: HTMLElement;
+    let el: FloatingButton;
     if (!existingEl) {
-      el = document.createElement("cal-floating-button");
+      el = document.createElement("cal-floating-button") as FloatingButton;
       // It makes it a target element that opens up embed modal on click
       el.dataset.calLink = calLink;
       el.dataset.calNamespace = this.cal.namespace;
+      el.dataset.calOrigin = calOrigin ?? "";
       if (attributes?.id) {
         el.id = attributes.id;
       }
 
       document.body.appendChild(el);
     } else {
-      el = existingEl;
+      el = existingEl as FloatingButton;
     }
-
-    if (buttonText) {
-      el.setAttribute("data-button-text", buttonText);
-    }
-    el.setAttribute("data-hide-button-icon", "" + hideButtonIcon);
-    el.setAttribute("data-button-position", "" + buttonPosition);
-    el.setAttribute("data-button-color", "" + buttonColor);
-    el.setAttribute("data-button-text-color", "" + buttonTextColor);
+    const dataset = el.dataset;
+    dataset["buttonText"] = buttonText;
+    dataset["hideButtonIcon"] = "" + hideButtonIcon;
+    dataset["buttonPosition"] = "" + buttonPosition;
+    dataset["buttonColor"] = "" + buttonColor;
+    dataset["buttonTextColor"] = "" + buttonTextColor;
   }
 
   modal({
@@ -517,13 +504,7 @@ class CalApi {
     document.body.appendChild(template.content);
   }
 
-  on({
-    action,
-    callback,
-  }: {
-    action: Parameters<SdkActionManager["on"]>[0];
-    callback: Parameters<SdkActionManager["on"]>[1];
-  }) {
+  on({ action, callback }: { action: never; callback: never }) {
     // eslint-disable-next-line prefer-rest-params
     validate(arguments[0], {
       required: true,
@@ -541,13 +522,7 @@ class CalApi {
     this.cal.actionManager.on(action, callback);
   }
 
-  off({
-    action,
-    callback,
-  }: {
-    action: Parameters<SdkActionManager["on"]>[0];
-    callback: Parameters<SdkActionManager["on"]>[1];
-  }) {
+  off({ action, callback }: { action: never; callback: never }) {
     this.cal.actionManager.off(action, callback);
   }
 
@@ -646,6 +621,8 @@ window.addEventListener("message", (e) => {
   if (!actionManager) {
     throw new Error("Unhandled Action" + parsedAction);
   }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   actionManager.fire(parsedAction.type, detail.data);
 });
 
@@ -661,6 +638,7 @@ document.addEventListener("click", (e) => {
   const modalUniqueId = (targetEl.dataset.uniqueId = targetEl.dataset.uniqueId || String(Date.now()));
   const namespace = targetEl.dataset.calNamespace;
   const configString = targetEl.dataset.calConfig || "";
+  const calOrigin = targetEl.dataset.calOrigin || "";
   let config;
   try {
     config = JSON.parse(configString);
@@ -682,5 +660,6 @@ document.addEventListener("click", (e) => {
     calLink: path,
     config,
     uid: modalUniqueId,
+    calOrigin,
   });
 });
